@@ -14,44 +14,40 @@ The following `R` chunk creates a dataset in a vector and stores it in `R`'s mem
 
 ```{r}
 
-x = c(10, 23, 14, 12, 34, 26, 28, 24)
+x = c(10, 23, 14, 12, 34, 26, 28)
+x <- append(x, 24)
 
 ```
 
 The mean of this data is
 
 ```{r}
-
 mean(x)
-
 ```
 
 The summary statistics (minimum, maximum, $Q_1$, median, mean and $Q_3$) obtained from the `summary()` function are:
 
 ```{r}
-# Insert your code here
 summary(x)
 ```
 
 The five number summary which uses Tukey's method to estimate the lower and upper quartiles ($Q_1$ and $Q_3$) is given below. Notice the small differences in these quartiles.
 
 ```{r}
-# Insert your code here
 fivenum(x)
 ```
 
 The boxplot of the data below also uses Tukey's method. I would describe the shape of the distribution using the boxplot as right skewed.
 
 ```{r}
-boxplot(x)
+boxplot(x, horizontal = TRUE)
 ```
 
-A histogram is given below. I would describe the shape of the distribution using the histogram as left skewed.
+A histogram is given below. I would describe the shape of the distribution using the histogram as right skewed. Although number of data points in the dataset are less to make any conclusion on the shape of histogram.
 
 
 
 ```{r}
-# Insert your code here
 hist(x)
 ```
 
@@ -61,6 +57,9 @@ hist(x)
 Use the help system in `R` to learn how to use the `breaks` argument in the `hist` function to include around 10 breakpoints. To use the help system type `help(hist)`
 
 
+```{r}
+hist(x, breaks=10)
+```
 
 
 

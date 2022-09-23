@@ -9,8 +9,18 @@ conv_df_to_list <- function(dataframe){
   return(output)
 }
 
-output <- conv_df_to_list(head(Formaldehyde))
 
-str(output)
+names(mtcars)
 
+length(mtcars[["mpg"]])
 
+Formaldehyde
+
+c_1 <- conv_df_to_list(Formaldehyde)
+str(c_1)
+
+mtcars1 <- head(mtcars)
+mtcars1
+
+c_2 <- conv_df_to_list(mtcars1)
+str(c_2)

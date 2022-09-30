@@ -25,7 +25,7 @@ get_film_info <- function(x){
                           }
                         )
   
-  out <- target_list[lengths(out) != 0]
+  out <- out[lengths(out) != 0]
   
   return(out)
 }

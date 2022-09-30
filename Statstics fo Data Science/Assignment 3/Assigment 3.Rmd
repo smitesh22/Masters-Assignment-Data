@@ -61,23 +61,26 @@ lowbwt %>% select(low, ht) %>% table()
 It seems there were not many mothers with hypertension, but the proportions of low weight babies is very much higher for mothers suffering from hypertension status than those that were not.
 
 ```{r}
-lowbwt %>% select(low, ht) %>% table() %>% prop.table(margin = 2)
+lowbwt %>% select(low, ht) %>% table() %>% prop.table(margin = 1)
 ```
 
 Task: In the following `R` chunk explore the association between uterine irritability and whether the babies were born with low birthweight, using both the counts and appropriate percentages. Explain the results in words.
 
+Answer: In the dataset, there are not many mothers with uterine irritablity.
+But  the percentage of low weight babies is higher with mothers suffering uterine irritability and 
+
 ```{r}
 
-
+lowbwt %>% select(low, ui) %>% table() %>% prop.table(margin = 1)
 
 ```
 
 Task: In the following `R` chunk explore the association between smoking status and whether the babies were born with low birthweight, using both the counts and appropriate percentages. Explain the results in words.
 
 ```{r}
+lowbwt %>% select(low, smoke) %>% table()
 
-
-
+lowbwt %>% select(low, smoke) %>% table() %>% prop.table(margin = 1)*100
 ```
 
 Now we will create some barcharts.
@@ -94,7 +97,8 @@ ggplot(lowbwt, aes(x = low, fill = low)) +
 Task: In the following `R` chunk create a frequency plot of the smoking status.
 
 ```{r}
-
+ggplot(lowbwt, aes(x = smoke)) +
+  geom_bar()
 
 ```
 
@@ -104,7 +108,7 @@ Task: In the following `R` chunk create a frequency plot of the smoking status.
 Below is a relative frequency plot of the low birthweight of the babies against the hypertension status of the mothers using a stacked barchart.
 
 ```{r}
-ggplot(lowbwt, aes(x = ht)) +
+ggplot(lowbwt, aes(x = ht, fill = low)) +
      geom_bar(aes(fill = low), position = "fill") +
      ylab("Proportion")
 ```
@@ -112,16 +116,29 @@ ggplot(lowbwt, aes(x = ht)) +
 
 Task: Create a stacked barchart of low birthweight by smoking status by inserting an `R` chunk and relevant code below.
 
-
+```{r}
+ggplot(lowbwt, aes(x = smoke, fill = low)) +
+     geom_bar(aes(fill = low), position = "fill") +
+     ylab("Proportion")
+```
 
 
 Task: Create a stacked barchart of low birthweight by uterine irritability by inserting an `R` chunk and relevant code below.
+
+``` {r}
+
+ggplot(lowbwt, aes(x = ui, fill = low)) +
+     geom_bar(aes(fill = low), position = "fill") +
+     ylab("Proportion")
+```
+
+```
 
 
 
 Task: Once you have created the plots, explain your interpretation of which factors are associated with low birthweight based on the three barcharts. State which factor you think is most associated with birthweight.
 
-
+```
 
 The following `R` chunk produces a boxplot of the birthweight distribution.
 
@@ -137,9 +154,12 @@ Task: In the previous task you stated which factor you believe was most associat
 
 [Hint: we used side-by-side boxplots in the week 4 lab and in the Exploratory Data Analysis worksheet]
 
+``` {r}
+lowbwt %>% ggplot(aes(y = bwt, x = factor(ui))) +
+  geom_boxplot() +
+  labs(y = "Birthweight (in grams)")
 
-
-
+```
 
 
 

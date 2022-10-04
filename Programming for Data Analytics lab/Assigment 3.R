@@ -15,13 +15,12 @@ dirs
 
 
 get_film_info <- function(x){
-  x <- "George Lucas"
-  out <- lapply(sw_films, function(y){
-                          if(y$director==x) list(y$director, 
-                                                      y$title,
-                                                      y$episode,
-                                                      y$opening,
-                                                      y$release_date)
+  out <- lapply(sw_films, function(x){
+                          if(x$director=="George Lucas") list("Director" = x$director, 
+                                                  "Title" = x$title,
+                                                  "Episode" = x$episode,
+                                                  "Opening" = x$opening,
+                                                  "Date" = x$release_date)
                           }
                         )
   
@@ -32,3 +31,4 @@ get_film_info <- function(x){
 
 movies <- get_film_info("George Lucas")
 str(movies)
+

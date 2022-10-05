@@ -1,3 +1,6 @@
+#name : Smitesh Patil
+#student id : 22223696
+
 library(repurrrsive)
 
 str(sw_films)
@@ -14,9 +17,9 @@ dirs <- get_directors()
 dirs
 
 
-get_film_info <- function(x){
+get_film_info <- function(name){
   out <- lapply(sw_films, function(x){
-                          if(x$director=="George Lucas") list("Director" = x$director, 
+                          if(x$director == name) list("Director" = x$director, 
                                                   "Title" = x$title,
                                                   "Episode" = x$episode,
                                                   "Opening" = x$opening,

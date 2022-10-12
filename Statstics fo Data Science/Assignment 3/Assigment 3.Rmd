@@ -178,6 +178,8 @@ lowbwt %>% ggplot(aes(y = bwt, x = factor(ht), color = factor(ht))) +
 ```
 ```
 
+
+
 # Conclusion
 
 Task: Write a short conclusion of whether you think low birthweight of babies can be predicted based on whether the mother smoked, has hypertension or uterine irritability.

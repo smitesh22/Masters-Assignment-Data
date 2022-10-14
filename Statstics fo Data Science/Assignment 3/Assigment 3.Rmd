@@ -2,7 +2,9 @@
 title: "Investigating the Factors Affecting Birthweight"
 author: "Smitesh Patil, id = 22223696"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: word_document
+output:
+  pdf_document: default
+  word_document: default
 ---
 
 
@@ -69,24 +71,34 @@ Task: In the following `R` chunk explore the association between uterine irritab
 Answer:  In the dataset, there are not many mothers with uterine irritability.
 But in the percentage of low weight babies with mothers surrfering from uterin irritablity is much higher.
 
-For low birth weight babies, mothers with uterine irritablity have more that double the rate compared to normal birthweight babies.
+For low birth weight babies, mothers with uterine irritablity(23.7%) have more that double the rate compared to normal birthweight babies(10%).
+
+Absolute proportion of mothers with uterine irritability is divided equally among low birthweight(50%) and normal birthweight babies(50%).
 
 ```{r}
 lowbwt %>% select(low, ui) %>% table() 
 
 lowbwt %>% select(low, ui) %>% table() %>% prop.table(margin = 1)*100
 
+lowbwt %>% select(low, ui) %>% table() %>% prop.table(margin = 2)*100
+
 ```
 
 Task: In the following `R` chunk explore the association between smoking status and whether the babies were born with low birthweight, using both the counts and appropriate percentages. Explain the results in words.
 
-Answer: Smoking seems to be adversely affecting babies with low birthweight. among low weight babies almost 50% of mothers smoked. on the other hand for babies with nomal birthweight only 33% of mothers smoked.
+Answer: Smoking seems to be adversely affecting babies with low birthweight. 
+
+Among low weight babies almost 50% of mothers smoked. on the other hand for babies with nomal birthweight only 33% of mothers smoked.
+
+In terms of absolute proportion of mothers with smoking habit, proportion is higher for normal birth weights(59%) and higher for low birth weights(40%)
 
 ```{r}
 
 lowbwt %>% select(low, smoke) %>% table()
 
 lowbwt %>% select(low, smoke) %>% table() %>% prop.table(margin = 1)*100
+
+lowbwt %>% select(low, smoke) %>% table() %>% prop.table(margin = 2)*100
 
 ```
 

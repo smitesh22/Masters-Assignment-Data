@@ -1,3 +1,6 @@
+#Student Id : 22223696
+#Name : Smitesh Patil
+
 set.seed(100)
 CX101 <- rnorm(20,45,8)
 CX102 <- rnorm(20,65,8)
@@ -19,36 +22,36 @@ mat <- matrix(c(CX101, CX102, CX103, CX104, CX105), ncol = 5)
 colnames(mat) <- col_names
 rownames(mat) <- row_names
 
-mat_with_na = apply(mat, c(1,2), function(x){
-   if(x > 100){
+### Matrix with na values for invalid data
+
+res1 <- apply(mat, c(1,2), function(x){
+   if(x > 100 || x < 0){
      x <- NA
    }else{
      x <- x
    }
 })
 
-#mean_val <- mean(mat_with_na[, "CX103"], na.rm = TRUE)
+print(res1)
 
+###Matrix with Mean value of column replaced by NA
 
-mat_with_avg = apply(mat_with_na, c(1, 2), function(x){
-  col.means <- apply(mat_with_na, 2, mean, na.rm=T)
-  if(is.na(x)){
-    x <- col.means[3]
-  }else{
-    x <- x
-  }
-})
+res2 = apply(res1, 2, function(x){
+  ifelse(is.na(x) == T, mean(x, na.rm= T), x)
+  })
 
-print(mat_with_avg)
+print(res2)
 
-mean <- apply(mat, 1, mean)
-range <- apply(mat, 1, function(x){
+mean <- apply(res2, 1, mean)
+range <- apply(res2, 1, function(x){
   x <- max(x) - min(x)
 })
 
-mat_with_mean <- cbind(mat_with_avg, mean)
+## adding new columns mean and range
+mat_with_mean <- cbind(res2, mean)
 mat_with_range <- cbind(mat_with_mean, range)
 
 
+## retriveing maximum mean value
 max <- apply(mat_with_range, 2, max)['mean']
-mat_with_range[mat_with_range[, 'mean'] == max, ,drop= F]
+max_mean <- mat_with_range[mat_with_range[, 'mean'] == max, ,drop= F]

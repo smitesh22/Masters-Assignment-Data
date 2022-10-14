@@ -10,7 +10,7 @@ library(tibble)
 
 
 d <- nycflights13::flights
-d$hour <- as.factor(d $hour)
+d$hour <- as.factor(d$hour)
 
 d <- d %>%
   select(month, hour, origin, day, dep_delay, arr_delay, air_time,

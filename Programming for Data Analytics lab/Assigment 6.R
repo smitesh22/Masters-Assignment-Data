@@ -20,5 +20,9 @@ s_data_diff <- s_data_diff[,c(1, 2, 3, 4, 5, 9, 10)] %>%
 
 s_data_diff <- s_data_diff %>% select(station...1, day...2, month...3,
                        TotalRain...4, AvrTemp...5, RainDiff, MeanTempDiff) %>%
-  mutate(AbsRainDiff = abs(RainDiff), AbsMeanTempDiff = abs(MeanTempDiff))
+  mutate(AbsRainDiff = abs(RainDiff), AbsMeanTempDiff = abs(MeanTempDiff)) %>%
+  select(station = station...1, day = day...2, month = month...3,
+         TotalRain = TotalRain...4, AvrTemp= AvrTemp...5, RainDiff, AbsRainDiff,
+         MeanTempDiff, AbsMeanTempDiff)
+
 

@@ -26,3 +26,31 @@ s_data_diff <- s_data_diff %>% select(station...1, day...2, month...3,
          MeanTempDiff, AbsMeanTempDiff)
 
 
+out <- s_data_diff %>%group_by(station, month) %>%
+  summarise(AvgDiffTemp = mean(MeanTempDiff, na.rm=T),
+            SDDiffTemp = sd(MeanTempDiff, na.rm=T),
+            MinDiffTemp = min(MeanTempDiff, na.rm=T), 
+            MaxDiffTemp = max(MeanTempDiff, na.rm=T),
+            AvgDiffRain = mean(RainDiff, na.rm=T),
+            SDDiffRain = sd(RainDiff, na.rm=T),
+            MinDiffRain = min(RainDiff, na.rm=T),
+            MaxDiffRain = max(RainDiff, na.rm=T))
+
+ggplot(out,aes(x = month))+
+  geom_line(aes(y = MinDiffTemp), colour="Blue") +
+  geom_line(aes(y = MaxDiffTemp), colour="Blue") +
+  facet_wrap(~station) +
+  geom_ribbon(aes(ymin = -SDDiffTemp, ymax = SDDiffTemp),fill="Red") +
+  geom_point(aes(y = AvgDiffTemp))+
+  geom_line(aes(y = AvgDiffTemp))+
+  coord_cartesian(ylim = c(5, -5))
+
+
+ggplot(out,aes(x = month))+
+  geom_line(aes(y = MinDiffRain), colour="Red") +
+  geom_line(aes(y = MaxDiffRain), colour="Red") +
+  geom_ribbon(aes(ymin = -SDDiffRain, ymax = SDDiffRain),fill="blue") +
+  geom_point(aes(y = AvgDiffRain))+
+  geom_line(aes(y = AvgDiffRain))+
+  facet_wrap(~station) +
+  coord_cartesian(ylim = c(20, -20))

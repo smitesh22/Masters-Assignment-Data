@@ -56,4 +56,4 @@ cor_month <- ds %>%group_by(station, month) %>%
             Corr_NI = cor(NI, temp),
             Diff = Corr_IE - Corr_NI)
 slice(cor_month,1:nrow(cor_month))
-
+ 

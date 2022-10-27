@@ -60,7 +60,7 @@ ggplot(out,aes(x = month))+
   geom_ribbon(aes(ymin = -SDDiffTemp, ymax = SDDiffTemp),fill="Red") +
   geom_point(aes(y = AvgDiffTemp))+
   geom_line(aes(y = AvgDiffTemp))+
-  coord_cartesian(ylim = c(5, -5))+
+  coord_cartesian(ylim = c(-5, 5))+
   scale_x_continuous(breaks = seq(1, 12, by = 1))+
   ylab("AvrDiffTemp")+
   xlab("month")
@@ -73,7 +73,7 @@ ggplot(out,aes(x = month))+
   geom_point(aes(y = AvgDiffRain))+
   geom_line(aes(y = AvgDiffRain))+
   facet_wrap(~station) +
-  coord_cartesian(ylim = c(20, -20)) +
+  coord_cartesian(ylim = c(-25, 25)) +
   scale_x_continuous(breaks = seq(1, 12, by = 1))+
   ylab("AvgDiffRain")+
   xlab("month")

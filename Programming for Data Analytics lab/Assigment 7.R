@@ -1,3 +1,6 @@
+#Name: Smitesh Patil
+#Student id : 22223696
+
 library(aimsir17)
 library(ggplot2)
 library(dplyr)
@@ -16,15 +19,15 @@ glimpse(obs)
 
 ener <- eirgrid17 %>%
   group_by(year, month, day, hour) %>%
-  summarise(IE = mean(IEDemand),
-            NI = mean(NIDemand),
+  summarise(IE = mean(IEDemand, na.rm=T),
+            NI = mean(NIDemand, na.rm=T),
             CheckObs = n()) %>%
   ungroup()
 
 
-ds <- left_join(ener, obs)
+ds <- left_join(ener, obs, by = c("year", "month", "day", "hour"))
 set.seed(100)
-ds <- sample_frac(ds, 0.1, replace = T)
+ds <- sample_frac(ds, 0.1, replace = F)
 
 ds
 

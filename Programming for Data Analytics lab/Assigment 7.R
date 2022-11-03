@@ -40,10 +40,12 @@ ds1 <- pivot_longer(ds, 5:6, names_to = "Area", values_to = "Demand")
 
 ggplot(ds1, aes(x = temp, y=Demand, color = Area)) + 
   geom_point()+
+  geom_smooth(method = lm)+
   facet_grid(cols = vars(Season), vars(rows = station))
 
 ggplot(ds1, aes(x = temp, y=Demand, color = Area)) + 
   geom_point()+
+  geom_smooth(method = lm)+
   facet_grid(cols = vars(month), vars(rows = station))
 
   

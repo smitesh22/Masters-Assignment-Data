@@ -57,23 +57,25 @@ ggplot(out,aes(x = month))+
   geom_line(aes(y = MinDiffTemp), colour="Blue") +
   geom_line(aes(y = MaxDiffTemp), colour="Blue") +
   facet_wrap(~station) +
-  geom_ribbon(aes(ymin = -SDDiffTemp, ymax = SDDiffTemp),fill="Red") +
+  geom_ribbon(aes(ymin = AvgDiffTemp-SDDiffTemp, ymax = AvgDiffTemp+SDDiffTemp),fill="Red", alpha = 0.3) +
   geom_point(aes(y = AvgDiffTemp))+
   geom_line(aes(y = AvgDiffTemp))+
   coord_cartesian(ylim = c(-5, 5))+
   scale_x_continuous(breaks = seq(1, 12, by = 1))+
   ylab("AvrDiffTemp")+
-  xlab("month")
+  xlab("month")+
+  guides(x = guide_axis(angle = 90))
 
 # second plot for Rain data
 ggplot(out,aes(x = month))+
   geom_line(aes(y = MinDiffRain), colour="Red") +
   geom_line(aes(y = MaxDiffRain), colour="Red") +
-  geom_ribbon(aes(ymin = -SDDiffRain, ymax = SDDiffRain),fill="blue") +
+  geom_ribbon(aes(ymin = AvgDiffRain-SDDiffRain, ymax = AvgDiffRain+SDDiffRain),fill="blue", alpha = 0.3) +
   geom_point(aes(y = AvgDiffRain))+
   geom_line(aes(y = AvgDiffRain))+
   facet_wrap(~station) +
   coord_cartesian(ylim = c(-25, 25)) +
   scale_x_continuous(breaks = seq(1, 12, by = 1))+
   ylab("AvgDiffRain")+
-  xlab("month")
+  xlab("month")+
+  guides(x = guide_axis(angle = 90))

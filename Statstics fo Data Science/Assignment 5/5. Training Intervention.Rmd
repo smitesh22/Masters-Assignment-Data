@@ -121,7 +121,7 @@ train.df %>% ggplot(aes(x = "", y = Improvement)) +
   xlab("") +
   coord_flip()
 
-train.df %>% select(Improvement) %>% summ
+train.df %>% select(Improvement) %>% summary()
 ```
 
 Task: Interpret!

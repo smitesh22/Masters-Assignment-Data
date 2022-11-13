@@ -1,8 +1,9 @@
 ---
 title: "Training Intervention Analysis"
-author: "your name, id=your student id"
+author: "Smitesh Nitin Patil, id=22223696"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
+  pdf_document: default
   html_document: default
 ---
  **Before you start: if you are a Mac user, you will need to install Xquartz from https://www.xquartz.org so you can use the 'tolerance' package.**  You can delete this line from your final report.  
@@ -141,11 +142,25 @@ Task: Based on the output given answer the following questions:
 
 * What is the mean improvement in V_IFT the population of interest? Interpret the relevant 95% Confidence Interval carefully.
 
+Answer : Mean improvement in V_IFT is 2.061111 among the 18 samples provided in sample of interest. 95% confidence interval means you can be 95% sure that the mean lies between the confidence interval provided.  
+
 * Use the relevant interval estimate and p-value to decide whether there is sufficient evidence in the sample provided to claim that there is any improvement on average in V_IFT in the population of interest.
+
+Answer : the p-value is less that the alpha(significance level) that means the result is statistically significant, there is a 95% chance that true mean always falls between values 1.151 and 2.970
 
 * What are the assumptions underlying the one sample t-test presented?
 
+Answer: 1. Independence : observations are independent of one another.
+
+2. Normality : the samples are normally distributed.
+
+3. Random sampling :  both samples have approximately the same variance.
+
+4. Homogenity of Variance : Samples have same approx variance.
+
 * Explain why or why not the assumptions seem justified based on the output provided.
+
+Answer : The assumptions seems to be justified based on the output as the p-value is very less.A p value of less than 0.05 or lower is generally considered statistically significant.
 
 ## 95% Bootstrap CI for the mean
 
@@ -163,6 +178,10 @@ round(percentile_ci,2)
 
 Task: Interpret!
 
+Answer : Here in the data frame boot we are generating 1000 samples using the generate() method and then we calculate a distribution of statistic in this case mean using calculate.
+
+get_ci method gets confidence interval values with confidence level at 95% by default.
+
 ```{r}
 boot %>% visualize()+
   shade_confidence_interval(endpoints = percentile_ci) +
@@ -171,6 +190,8 @@ boot %>% visualize()+
 ```
 
 Task: Interpret!
+
+Answer : the shaded area shows the confidence interval of 95% for the data simulated using bootstrap method which seems to be normally distrbuted.
 
 ## 95% Bootstrap CI for the median improvement
 
@@ -188,6 +209,10 @@ round(percentile_ci_median,2)
 
 Task: Interpret!
 
+Answer : Here in the data frame boot.median we are generating 1000 samples using the generate() method and then we calculate a distribution of statistic in this case median using calculate.
+
+get_ci method gets confidence interval values with confidence level at 95% by default which come out between 0.8 and 3.05.
+
 ```{r}
 boot.median %>% visualize()+
   shade_confidence_interval(endpoints = percentile_ci_median) +
@@ -197,6 +222,7 @@ boot.median %>% visualize()+
 
 Task: Interpret!
 
+Answer : the shaded area shows the confidence interval of 95% for the data simulated using bootstrap method for median.
 
 
 ## 95% Tolerance Interval (Bonus Question)
@@ -211,12 +237,17 @@ normtol.int(train.df$Improvement, alpha = 0.05, P = 0.95)
 
 Task: Interpret!
 
+Above code provides 1-sided tolerance intervals for improvement in V_IFT with confidence level value of 0.05 and p-value of 0.95
 
 ## Overall Conclusion 
 Task: state your overall conclusion. 
 
+``` {r}
 
- 
+t.test(train.df$VIFT_Pre, train.df$VIFT_Post)
 
+```
+Answer : lets do a two sample t-test between VIFT_pre and VIFT_post. Null hypotheses here is that there is no difference between the mean values pre and post training but as the output of T-test shows that the alternate hypotheses is true i.e the true difference in mean is not equal to zero.
+Hence the null hypotheses is rejected and improvement post training is proved.
 
 

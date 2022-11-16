@@ -39,9 +39,15 @@ glimpse(ds)
 # confirming no incomplete cases in ds
 sum(!complete.cases(ds))
 
-# creating tibble for each station and running linear model on station for a hypotheses
+
+#creating tibble for each station
 ds_n <- ds %>% group_by(station) %>%
-  nest() %>% 
+  nest()
+
+ds_n
+
+#Running linear model on station for a hypotheses
+ ds_n <- ds_n %>% 
   mutate(LM = map(data,
                   ~lm(AvrWindGen ~ wdsp, data = .)))
 

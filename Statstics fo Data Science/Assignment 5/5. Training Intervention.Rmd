@@ -30,11 +30,34 @@ To answer the question of interest, provide a detailed response for all of the t
 
 Task: State the appropriate null and alternative hypotheses for the V_IFT study.
 
+Answer : Null hypothesis of a test predicts that there is no effect or improvement between variables.
+
+In the case of V_IFT, null hypothesis states that there is no change after 10 weeks of training, i.e. mean of VIFT_Pre and VIFT_Post are the same.
+
+H0 : mean(VIFT_Pre) = mean(VIFT_Post)
+H0 <- Null Hypothesis
+
+Where as Alternate hypothesis predicts that there indeed is some relationship between the variables of the test in this case V_IFT.
+
+In the case of V_IFT, alternate hypothesis states that there is an improvement in the value of V_IFT post the training of 10 weeks.
+
+H1 : mean(VIFT_Pre) < mean(VIFT_Post)
+H1 <- Alternate Hypothesis
+
+
+
 
 Task: Define a Type I and Type II error and discuss the implication of making these
 errors in this study.
 
+Answer: Type-I error (false positive) happens when we reject null hypothesis when its true.
 
+In this task, when there is no improvement in V_IFT but we conclude that there is improvement then that's a false positive or a Type-I error.
+
+Type-II error (false negative) happens when we fail to reject null hypothesis
+when its false.
+
+In this task, when there is improvement in V_IFT but we conclude that there isn't any improvement, then that's a false negative or a Type-II error.
 
 ## Read in the training intervention data
 
@@ -51,6 +74,7 @@ glimpse(train.df)
 
 ```{r}
 train.df %>% select(VIFT_Pre,VIFT_Post) %>% summary()
+
 ```
 Task: Interpret!
 
@@ -249,5 +273,3 @@ t.test(train.df$VIFT_Pre, train.df$VIFT_Post)
 ```
 Answer : lets do a two sample t-test between VIFT_pre and VIFT_post. Null hypotheses here is that there is no difference between the mean values pre and post training but as the output of T-test shows that the alternate hypotheses is true i.e the true difference in mean is not equal to zero.
 Hence the null hypotheses is rejected and improvement post training is proved.
-
-

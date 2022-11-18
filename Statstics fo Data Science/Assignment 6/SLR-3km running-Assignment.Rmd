@@ -44,8 +44,8 @@ Task: Calculate the summary statistics for each column in the data and describe 
 running %>%
   summarise(Mean_v4mM = mean(v4mM),
             SD_v4mM = sd(v4mM),
-            Mean_vTlac = mean(vTlac),
-            SD_vTlac = sd(vTlac)
+            Mean_running.Time = mean(Running.Time),
+            SD_running.Time = sd(Running.Time)
             )
 
 ```

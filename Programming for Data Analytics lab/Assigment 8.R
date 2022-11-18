@@ -71,9 +71,10 @@ ds_n <- ds_n %>%
       xlab("speed")+
       ylab("power")+
       ggtitle(.y)+
-      geom_smooth()+
       geom_point(colour=randomColor(luminosity="light")) +
-      theme_classic()
+      geom_smooth(color = randomColor())+
+      theme_classic()+
+      theme(plot.title = element_text(size = 6, face = "bold"))
   }))
 
 # plotting the ggplot objects in the tibble

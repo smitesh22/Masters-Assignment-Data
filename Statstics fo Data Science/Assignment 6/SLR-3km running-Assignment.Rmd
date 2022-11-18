@@ -3,7 +3,9 @@ title: "Simple Linear Regression Assignment"
 author: "Smitesh Patil, id=22223696"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
+  pdf_document: default
   html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -85,7 +87,7 @@ Interpretation : In simple linear regression, we try to fit our hypothesis (a li
 
 Task: calculate the correlation coefficient between `v4mM` vs `Running.Time` and interpret it.
 
-Interpretation : Co relation value of -0.925857 between v4mM and Running.Time supports our interpretation that the two variables are highy correlated negatively.
+Interpretation : Correlation value of -0.925857 between v4mM and Running.Time supports our interpretation that the two variables are highy correlated negatively.
 
 ``` {r}
 
@@ -98,6 +100,8 @@ running %>% select(v4mM, Running.Time) %>% cor()
 
 Task: Add the line of best fit to the scatter plot produced above and interpret it.
 
+Interpretation :geom_smooth  or stats_smooth are used to plot a hypothesis for the input data. The se=FALSE argument causes the line to not plot confidence interval and in method we pass lm to plot linee based on linear model.
+
 ``` {r}
 
 ggplot(running, aes(x = v4mM , y = Running.Time))+
@@ -108,7 +112,7 @@ ggplot(running, aes(x = v4mM , y = Running.Time))+
   
 Task: Estimate the parameters of the line of best fit for the linear relationship between 3 km running time and v-4mM in the sample.  This can then be used for inference about the linear relationship in the population of well-trained male middle and long distance runners.
 
-Interpretation : 
+Interpretation : by running the lm function and passing Running.Time and v4mM, you can predict Running.Time values based on the v4mM values. This gives us the intercept and slope values which can be used to plot our hypothesis with value y = mx+c. The values of paramters are the slope value m = -0.3729 and value of y-intercept 15.82223
 
 ``` {r}
 
@@ -120,6 +124,8 @@ model
 
 ### Equation of line of best fit
 Task: Write down the equation of the line of best fit and also provide an interpretation of the slope and intercept. Does the intercept have a physically meaningful interpretation?
+
+Interpretation : Here the line equation is of the format y = mx +c where m is the slope of the line and c is the y-intercept of the line. by using slope and the y intercept you can plot any line on a number-plane.
 
 ``` {r}
 
@@ -136,28 +142,58 @@ Task: Predict the running time (i.e. `Running.Time`) when running speed at blood
 v4mM_pred = data.frame(
   v4mM = c(14, 15, 16, 17, 18, 19, 20))
 
-predict(model, newdata = v4mM_pred, interval = "prediction")
-
 ```
 
 ### Interval estimation for predicted running times
 
 For each of the predictions produce a 95% confidence interval and 95% prediction interval, and interpret the results carefully.
 
+Interpretation : 95% confidence interval tells us that we are 95% confident that true mean lies between two values, whereas 95% prediction interval tells us that individual values of data lies between two values. Consequently, prediction intervals are larger than confidence interval.
+
+```{r}
+predict(model, newdata = v4mM_pred, interval = "confidence")
+predict(model, newdata = v4mM_pred, interval = "prediction")
+
+```
+
 
 ### Plots with confidence and prediction intervals
 
 Task: Add the 95% confidence and 95% prediction intervals to the scatter plot with the line of best fit, and interpret.
-``` {r}
-preds = predict(model, newdata = running, interval = "prediction")
 
-df2 = cbind(running, preds)
+Interpretation : In the below plot, blue dashed line indicate the confidence interval, whereas the red dashed line indicate prediction interval. As stated before, the prediction interval is larger in range than confidence interval as it gives probability of values lying between two values whereas prediction interval whereas confidence does the  same with the true mean.
+
+``` {r}
+preds_prediction = predict(model, newdata = running, interval = "prediction")
+
+preds_prediction <- data.frame(preds_prediction)
+
+preds_prediction <- preds_prediction %>% rename(
+  fit = fit,
+  lwr_pred = lwr,
+  upr_pred = upr
+)
+
+preds_confidence = predict(model, newdata = running, interval = "confidence")
+
+preds_confidence <- data.frame(preds_confidence)
+
+preds_confidence <- preds_confidence %>% rename(
+  lwr_con = lwr,
+  upr_con = upr
+) %>%
+  select(lwr_con, upr_con)
+
+
+df2 = data.frame(cbind(running, preds_confidence, preds_prediction))
 
 ggplot(df2, aes(y = Running.Time, x = v4mM)) +
          geom_point() +
           stat_smooth(method = lm) +
-          geom_line(aes(y = lwr), color = "red", linetype = "dashed")+
-          geom_line(aes(y = upr), color = "red", linetype = "dashed")
+          geom_line(aes(y = lwr_pred), color = "red", linetype = "dashed")+
+          geom_line(aes(y = upr_pred), color = "red", linetype = "dashed")+
+          geom_line(aes(y = upr_con), color = "blue", linetype = "dashed")+
+          geom_line(aes(y = lwr_con), color = "blue", linetype = "dashed")
 ```
 
 
@@ -173,9 +209,13 @@ predict(model, newdata = data.frame(v4mM = 18.9))
 
 Task: Why is the result here is different from 8.82, the observed running time when running speed at blood lactate concentration 4 mmol/litre (`v4mM`) is 18.9 mmol.l-1? (see observation row 4) 
 
+Interpretation : This is because the value given as prediction by our linear model is just an estimated value that it learns by training on the data provided. The model accuracy depends on many factors like the size of the dataset, the features of the dataset, hyperparamters of the model, etc. Hence, the value of running speed is diffrent than the one predicted.
 
 
-Task: Predict the running time (i.e. `Running.Time`) when  `v4mM` is 2.6 km per hour. Explain if you have any concern related to this prediction.  
+
+Task: Predict the running time (i.e. `Running.Time`) when  `v4mM` is 2.6 km per hour. Explain if you have any concern related to this prediction.
+
+Interpretation : Yes, I am concerned with this prediciton. The value of 'v4mM' provided is an outlier. The values of 'v4mM' are provided in range of 14.2 to 20.4 as 2.6 value is an outlier the value that our hypothesis predicts would not be considered accurate as our model has not trained on data around that value.
 
 ``` {r}
 
@@ -188,5 +228,5 @@ predict(model, newdata = data.frame(v4mM = 2.6))
 
 Task: State your overall conclusions from fitting a linear model for the relationship between 3k running time and the running speed at blood lactate concentration 4 mmol/litre.
 
-
+Answer : In brief, we found out that variables v4mM and Running.Time are highly negatively correlated hence, we can use the value of v4mM to predict running.time. We ran a simple linear regression model and used the model trained on data to make some predictions. We later stated out that prediction on outliers could be ambigious as the dataset doesn't contain any observed value in that range.
 

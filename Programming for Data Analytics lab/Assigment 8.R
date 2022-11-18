@@ -1,7 +1,7 @@
 # Smitesh Patil
 # student id: 22223696
 
-library(aimsir17)=
+library(aimsir17)
 library(dplyr)
 library(ggplot2)
 library(purrr)

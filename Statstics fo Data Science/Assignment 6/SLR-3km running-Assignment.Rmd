@@ -40,12 +40,24 @@ head(running)
 
 Task: Calculate the summary statistics for each column in the data and describe the key features of the data. 
 
+Interpretation : Mean of vTlac is the mean threshold value of blood lactate and mean of v4mM is the lactate value of is greater than threshold (17.06). Average running time for athletes is 9.45 minutes. Our task is to find relation between v4mM and running.Time. to see if we can predict running.time based on v4mM value.
+
 ``` {r}
 running %>%
   summarise(Mean_v4mM = mean(v4mM),
             SD_v4mM = sd(v4mM),
             Mean_running.Time = mean(Running.Time),
-            SD_running.Time = sd(Running.Time)
+            SD_running.Time = sd(Running.Time),
+            Mean_vTlac = mean(vTlac),
+            SD_vTlac = sd(vTlac),
+            Mean_Rel.14.5 = mean(Rel.14.5),
+            SD_Rel.14.5 = sd(Rel.14.5),
+            Mean_Rel.16.1 = mean(Rel.16.1),
+            SD_Rel.16.1 = sd(Rel.16.1),
+            Mean_VO2Max = mean(VO2Max),
+            SD_VO2Max = sd(VO2Max)
+ 
+            
             )
 
 ```
@@ -59,6 +71,8 @@ Interpretation : On a look, it seems that the variables Running.Time and v4mM ha
 ``` {r}
 
 ggplot(running, aes(x = v4mM , y = Running.Time))+
+  xlab("v4mM in km per hour")+
+  ylab("Running time in minutes")+
   geom_point()
 
 ```
@@ -75,6 +89,8 @@ Interpretation : Smoothing aids us to see a pattern by plotting a line and inter
 
 ggplot(running, aes(x = v4mM , y = Running.Time))+
   geom_point()+
+  xlab("v4mM in km per hour")+
+  ylab("Running time in minutes")+
   geom_smooth()
 ```
 
@@ -106,13 +122,15 @@ Interpretation :geom_smooth  or stats_smooth are used to plot a hypothesis for t
 
 ggplot(running, aes(x = v4mM , y = Running.Time))+
   geom_point()+
+  xlab("v4mM in km per hour")+
+  ylab("Running time in minutes")+
   geom_smooth(method = "lm", se = FALSE)
 ```
 ### Fitting a Simple Linear Regression Model
   
 Task: Estimate the parameters of the line of best fit for the linear relationship between 3 km running time and v-4mM in the sample.  This can then be used for inference about the linear relationship in the population of well-trained male middle and long distance runners.
 
-Interpretation : by running the lm function and passing Running.Time and v4mM, you can predict Running.Time values based on the v4mM values. This gives us the intercept and slope values which can be used to plot our hypothesis with value y = mx+c. The values of paramters are the slope value m = -0.3729 and value of y-intercept 15.82223
+Interpretation : by running the lm function and passing Running.Time and v4mM, you can predict Running.Time values based on the v4mM values. This gives us the intercept and slope values which can be used to plot our hypothesis with value y = mx+c. The values of parameters are the slope value m = -0.3729 and value of y-intercept 15.82223
 
 ``` {r}
 
@@ -193,29 +211,28 @@ ggplot(df2, aes(y = Running.Time, x = v4mM)) +
           geom_line(aes(y = lwr_pred), color = "red", linetype = "dashed")+
           geom_line(aes(y = upr_pred), color = "red", linetype = "dashed")+
           geom_line(aes(y = upr_con), color = "blue", linetype = "dashed")+
-          geom_line(aes(y = lwr_con), color = "blue", linetype = "dashed")
+          geom_line(aes(y = lwr_con), color = "blue", linetype = "dashed")+
+          xlab("v4mM in km per hour")+
+          ylab("Running time in minutes")
 ```
 
 
 ### More prediction
 
 Task: Predict the running time (i.e. `Running.Time`) when running speed at blood lactate concentration 4 mmol/litre (i.e. `v4mM`) is 18.9 km per hour. 
+
 ``` {r}
-
 predict(model, newdata = data.frame(v4mM = 18.9))
-
 ```
 
 
 Task: Why is the result here is different from 8.82, the observed running time when running speed at blood lactate concentration 4 mmol/litre (`v4mM`) is 18.9 mmol.l-1? (see observation row 4) 
 
-Interpretation : This is because the value given as prediction by our linear model is just an estimated value that it learns by training on the data provided. The model accuracy depends on many factors like the size of the dataset, the features of the dataset, hyperparamters of the model, etc. Hence, the value of running speed is diffrent than the one predicted.
-
-
+Interpretation : This is because the value given as prediction by our linear model is just an estimated value that it learns by training on the data provided. The model accuracy depends on many factors like the size of the dataset, the features of the dataset, hyperparamters of the model, etc. Hence, the value of running speed is different than the one predicted.
 
 Task: Predict the running time (i.e. `Running.Time`) when  `v4mM` is 2.6 km per hour. Explain if you have any concern related to this prediction.
 
-Interpretation : Yes, I am concerned with this prediciton. The value of 'v4mM' provided is an outlier. The values of 'v4mM' are provided in range of 14.2 to 20.4 as 2.6 value is an outlier the value that our hypothesis predicts would not be considered accurate as our model has not trained on data around that value.
+Interpretation : Yes, I am concerned with this prediciton. The value of 'v4mM' provided is an outlier. The values of 'v4mM' are provided in range of 14.2 km/hr to 20.4 km/hr as 2.6 km/hr value is an outlier the value that our hypothesis predicts would not be considered accurate as our model has not trained on data around that value.
 
 ``` {r}
 

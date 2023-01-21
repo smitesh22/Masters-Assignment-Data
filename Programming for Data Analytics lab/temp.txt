@@ -1,0 +1,12 @@
+Variable	Description
+manufacturer	The company who is responsible for making the vehicle
+model	The model of the car
+displ	The displacement or engine size of the engine in the standard model of the vehicle (in liters)
+year	The model year of the vehicle
+cyl	The number of cylinders in the vehicle’s engine
+trans	The type of transmission inside of the vehicle (manual or automatic)
+drv	“drv” stands for “drivetrain” which is either forward, rear, or 4-wheel drive
+cty	The number of city miles per gallon that the car is able to achieve
+hwy	The number of highway miles per gallon that the car is able to achieve
+fl	The vehicle’s fuel type
+class	The “type” of the vehicle (ex: compact, subcompact, midsize, etc.)

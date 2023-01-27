@@ -14,16 +14,61 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r}
+
+library(igraph)
+dib_graph<-read.graph("dib2.graphml",format="graphml")
+
+```
+```{r}
+cat("num vertices:", vcount(dib_graph), "\n")
+
+cat("num edges :", ecount(dib_graph), "\n")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+cat(components(dib_graph, mode="strong")$csize)
+cat(components(dib_graph, mode="weak")$csize)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+diameter(dib_graph, directed = T, unconnected = TRUE, weights=NA)
+```
+
+```{r}
+cat("average path length :", mean_distance(dib_graph, directed = T), "\n")
+```
+
+```{r}
+cat("clustering coeff :", transitivity(dib_graph, type="localaverage"), "\n")
+```
+
+```{r}
+deg<-degree(dib_graph, mode = "in")
+
+hist(deg, 
+     breaks=(min(deg)-1):(max(deg))+0.5,
+     freq=FALSE, 
+     xlab = "in-degree", 
+     ylab = "proportion", 
+     main = "Histogram of In-Degree Distribution",
+     border="#80b1d3", 
+     col="#8dd3c7", 
+     xlim=c(0,max(deg)),
+     ylim=c(0,0.06))
+```
+
+```{r}
+deg<-degree(dib_graph, mode = "out")
+
+hist(deg, 
+     breaks=(min(deg)-1):(max(deg))+0.5,
+     freq=FALSE, 
+     xlab = "in-degree", 
+     ylab = "proportion", 
+     main = "Histogram of In-Degree Distribution",
+     border="#80b1d3", 
+     col="#8dd3c7", 
+     xlim=c(0,max(deg)),
+     ylim=c(0,0.06))
+```

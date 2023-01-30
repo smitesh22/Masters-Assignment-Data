@@ -1,6 +1,8 @@
 ---
 title: "Assingment 1"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: '2023-01-25'
 ---
 
@@ -8,11 +10,7 @@ date: '2023-01-25'
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+1. Basic measures
 
 ```{r}
 
@@ -20,28 +18,50 @@ library(igraph)
 dib_graph<-read.graph("dib2.graphml",format="graphml")
 
 ```
+
+1.1 Give the number of nodes and edges
+
 ```{r}
 cat("num vertices:", vcount(dib_graph), "\n")
 
 cat("num edges :", ecount(dib_graph), "\n")
 ```
+1.2 Is the network strongly or weakly connected. If neither, what is the distribution of
+component sizes.
+
 
 ```{r}
-cat(components(dib_graph, mode="strong")$csize)
-cat(components(dib_graph, mode="weak")$csize)
+strong_component = as.data.frame(table(factor(components(dib_graph, mode="strong")$csize)))
+names(strong_component)[1] = "Component Size"
+strong_component
 ```
 
-```{r}
-diameter(dib_graph, directed = T, unconnected = TRUE, weights=NA)
-```
+The table above shows strongly connected components in the directed network. There is one component with 5479, 6 and 5 nodes and a distribution of component with sizes varying from 1 to 4.
 
 ```{r}
-cat("average path length :", mean_distance(dib_graph, directed = T), "\n")
+weak_component = as.data.frame(table(factor(components(dib_graph, mode="weak")$csize)))
+names(weak_component)[1] = "Component Size"
+weak_component
 ```
 
+The table above shows weakly connected components in the directed network. There is one component with 8872 and 4 nodes with 30 weakly connected components of size 2 and 11 components with size 3.
+
+1.3 What is the diameter of the network ?
+
 ```{r}
-cat("clustering coeff :", transitivity(dib_graph, type="localaverage"), "\n")
+cat("The diamter of the network is : ", diameter(dib_graph, directed = T, unconnected = TRUE, weights=NA), "\n")
 ```
+1.4 What is the average path length of the network ?
+
+```{r}
+cat("The average path length of the network :", mean_distance(dib_graph, directed = T), "\n")
+```
+1.5 What is the clustering coefficient of the network ?
+
+```{r}
+cat("clustering coeff of the graph is :", transitivity(dib_graph, type="localaverage"), "\n")
+```
+1.6 What is the in- and out-degree distribution ?
 
 ```{r}
 deg<-degree(dib_graph, mode = "in")
@@ -66,7 +86,7 @@ hist(deg,
      freq=FALSE, 
      xlab = "in-degree", 
      ylab = "proportion", 
-     main = "Histogram of In-Degree Distribution",
+     main = "Histogram of Out-Degree Distribution",
      border="#80b1d3", 
      col="#8dd3c7", 
      xlim=c(0,max(deg)),

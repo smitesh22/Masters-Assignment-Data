@@ -98,7 +98,7 @@ library(kableExtra)
 
 clu<-components(dib_graph ,mode = "strong")
 scc_index <- which.max(clu$csize)
-scc<- V(dib_graph)[which(clu$membership==scc_index)]$name
+scc<- V(dib_graph)[which(clu$membership==scc_index)]$name 
 
 
 ```

@@ -1,5 +1,5 @@
 ---
-title: "Assingment 1"
+title: "Assignment 1"
 output:
   pdf_document: default
   html_document: default
@@ -68,14 +68,12 @@ deg<-degree(dib_graph, mode = "in")
 
 hist(deg, 
      breaks=(min(deg)-1):(max(deg))+0.5,
-     freq=FALSE, 
-     xlab = "in-degree", 
-     ylab = "proportion", 
+     xlab = "In-degree", 
+     ylab = "Proportion", 
      main = "Histogram of In-Degree Distribution",
-     border="#80b1d3", 
-     col="#8dd3c7", 
-     xlim=c(0,max(deg)),
-     ylim=c(0,0.06))
+     border="black", 
+     col="white", 
+     )
 ```
 
 ```{r}
@@ -83,12 +81,29 @@ deg<-degree(dib_graph, mode = "out")
 
 hist(deg, 
      breaks=(min(deg)-1):(max(deg))+0.5,
-     freq=FALSE, 
-     xlab = "in-degree", 
-     ylab = "proportion", 
+     xlab = "Out-degree", 
+     ylab = "Proportion", 
      main = "Histogram of Out-Degree Distribution",
-     border="#80b1d3", 
-     col="#8dd3c7", 
-     xlim=c(0,max(deg)),
-     ylim=c(0,0.06))
+     border="black", 
+     col="white")
+```
+
+2. Bowtie analysis
+
+2.1 What percentage of the network comprises the strongly connected component, the incomponent, the out-component, and tube.
+
+```{r}
+
+library(kableExtra)
+
+bowtie_components<-list()
+
+clu<-components(dib_graph ,mode = "strong")
+
+scc_index <- which.max(clu$csize)
+
+
+scc<- V(dib_graph)[which(clu$membership==scc_index)]$name
+
+
 ```

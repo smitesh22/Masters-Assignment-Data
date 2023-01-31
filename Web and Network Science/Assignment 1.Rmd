@@ -1,9 +1,11 @@
 ---
-title: "Assignment 1 - Smitesh Patil 22223696"
+title: "Assignment 1"
 output:
   pdf_document: default
+  word_document: default
   html_document: default
-date: '2023-01-25'
+date: '2023-01-31'
+subtitle: "Student ID : 22223696"
 ---
 
 ```{r setup, include=FALSE}
@@ -30,23 +32,22 @@ cat("num edges :", ecount(dib_graph), "\n")
 1.2 Is the network strongly or weakly connected. If neither, what is the distribution of
 component sizes.
 
-
+1. Strongly connected components
 ```{r}
 strong_component = as.data.frame(table(factor(components(dib_graph, mode="strong")$csize)))
 names(strong_component)[1] = "Component Size"
-kbl(strong_component)
-
+kable(strong_component)
 ```
+Answer: The table above shows strongly connected components in the directed network. There is one component with 5479, 6 and 5 nodes and a distribution of component with sizes varying from 1 to 4.
 
-The table above shows strongly connected components in the directed network. There is one component with 5479, 6 and 5 nodes and a distribution of component with sizes varying from 1 to 4.
+2. Weakly connected components
 
 ```{r}
 weak_component = as.data.frame(table(factor(components(dib_graph, mode="weak")$csize)))
 names(weak_component)[1] = "Component Size"
-kbl(weak_component)
+kable(weak_component)
 ```
-
-The table above shows weakly connected components in the directed network. There is one component with 8872 and 4 nodes with 30 weakly connected components of size 2 and 11 components with size 3.
+Answer: The table above shows weakly connected components in the directed network. There is one component with 8872 and 4 nodes with 30 weakly connected components of size 2 and 11 components with size 3.
 
 1.3 What is the diameter of the network ?
 
@@ -61,13 +62,16 @@ cat("The average path length of the network :", mean_distance(dib_graph, directe
 1.5 What is the clustering coefficient of the network ?
 
 ```{r}
-cat("clustering coeff of the graph is :", transitivity(dib_graph, type="localaverage"), "\n")
+cat("The clustering coeff of the graph is :", transitivity(dib_graph, type="localaverage"), "\n")
 ```
 1.6 What is the in- and out-degree distribution ?
 
 ```{r}
 deg<-degree(dib_graph, mode = "in")
+cat("The in-degree distribution of the graph varies from ", min(deg), "to ", max(deg))
+```
 
+```{r}
 hist(deg, 
      breaks=(min(deg)-1):(max(deg))+0.5,
      xlab = "In-degree", 
@@ -80,6 +84,10 @@ hist(deg,
 
 ```{r}
 deg<-degree(dib_graph, mode = "out")
+cat("The in-degree distribution of the graph varies from ", min(deg), "to ", max(deg))
+```
+
+```{r}
 
 hist(deg, 
      breaks=(min(deg)-1):(max(deg))+0.5,

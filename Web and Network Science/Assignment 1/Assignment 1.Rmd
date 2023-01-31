@@ -1,5 +1,5 @@
 ---
-title: "Assignment 1"
+title: "Assignment 1 - Smitesh Patil 22223696"
 output:
   pdf_document: default
   html_document: default
@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 
 library(igraph)
+library(kableExtra)
 dib_graph<-read.graph("dib2.graphml",format="graphml")
 
 ```
@@ -33,7 +34,8 @@ component sizes.
 ```{r}
 strong_component = as.data.frame(table(factor(components(dib_graph, mode="strong")$csize)))
 names(strong_component)[1] = "Component Size"
-strong_component
+kbl(strong_component)
+
 ```
 
 The table above shows strongly connected components in the directed network. There is one component with 5479, 6 and 5 nodes and a distribution of component with sizes varying from 1 to 4.
@@ -41,7 +43,7 @@ The table above shows strongly connected components in the directed network. The
 ```{r}
 weak_component = as.data.frame(table(factor(components(dib_graph, mode="weak")$csize)))
 names(weak_component)[1] = "Component Size"
-weak_component
+kbl(weak_component)
 ```
 
 The table above shows weakly connected components in the directed network. There is one component with 8872 and 4 nodes with 30 weakly connected components of size 2 and 11 components with size 3.
@@ -49,7 +51,7 @@ The table above shows weakly connected components in the directed network. There
 1.3 What is the diameter of the network ?
 
 ```{r}
-cat("The diamter of the network is : ", diameter(dib_graph, directed = T, unconnected = TRUE, weights=NA), "\n")
+cat("The diameter of the network is : ", diameter(dib_graph, directed = T, unconnected = TRUE, weights=NA), "\n")
 ```
 1.4 What is the average path length of the network ?
 
@@ -86,19 +88,4 @@ hist(deg,
      main = "Histogram of Out-Degree Distribution",
      border="black", 
      col="white")
-```
-
-2. Bowtie analysis
-
-2.1 What percentage of the network comprises the strongly connected component, the incomponent, the out-component, and tube.
-
-```{r}
-
-library(kableExtra)
-
-clu<-components(dib_graph ,mode = "strong")
-scc_index <- which.max(clu$csize)
-scc<- V(dib_graph)[which(clu$membership==scc_index)]$name 
-
-
 ```

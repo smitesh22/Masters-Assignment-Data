@@ -1,11 +1,10 @@
 ---
-title: "Assignment 1"
+title: "Untitled"
+author: "Smitesh Patil"
+date: '2023-02-01'
 output:
   pdf_document: default
-  word_document: default
   html_document: default
-date: '2023-01-31'
-subtitle: "Student ID : 22223696"
 ---
 
 ```{r setup, include=FALSE}
@@ -95,6 +94,8 @@ hist(deg,
      border="black", 
      col="white")
 ```
+
+
 ```{r}
 clu<-components(dib_graph,mode = "strong")
 
@@ -147,6 +148,7 @@ tube = c()
 tube_career = c()
 tube_century = c()
 nodes_minus_SCC <- vertices[!(vertices$name %in% scc)]
+g_minus_SCC<-induced_subgraph(dib_graph ,nodes_minus_SCC)
 out = c()
 
 for (v in V(g_minus_SCC)[IN_component]){
@@ -163,6 +165,8 @@ tube_data = c()
 tube_data <- V(dib_graph)[V(dib_graph)$name %in% tube]
 tube_data_career <- tube_data$career
 tube_data_century <- tube_data$century
+
+length(OUT_component)
 ```
 
 ```{r}
@@ -213,4 +217,52 @@ tube_component_century <- as_tibble(table(tube_data_century)) %>% arrange(desc(n
 
 knitr::kable(list(scc_century, IN_component_century, OUT_component_century,tube_component_century))
 ```
+```{r}
 
+library(sjmisc)
+  
+century_data <- list(induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 15]),
+                     induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 16]),
+                     induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 17]),
+                     induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 18]),
+                     induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 19]),
+                     induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 20]))
+
+
+page_rank <- vector(mode = "list", length = 6)
+katz_centrality <- vector(mode = "list", length = 6)
+eigen_centrality <- vector(mode = "list", length = 6)
+between <- vector(mode = "list", length = 6)
+close <- vector(mode = "list", length = 6) 
+
+names(century_data) <- c("15th century", 
+                         "16th century",
+                         "17th century",
+                         "18th century",
+                         "19th century",
+                         "20th century")
+
+
+for(i in 1:length(century_data)){
+  page_rank[[i]] <- page_rank(century_data[[i]],  directed = TRUE, damping = 0.85)$vector
+  eigen_centrality[[i]] <- eigen_centrality(century_data[[i]], weights=NA)$vector
+  page_rank[[i]] <- page_rank[[i]] %>% sort(decreasing = TRUE) %>% head(1)
+  eigen_centrality[[i]] <- eigen_centrality[[i]] %>% sort(decreasing = TRUE) %>% head(1)
+  between[[i]] <- betweenness(century_data[[i]], weights=NA)
+  between[[i]] <- between[[i]] %>% sort(decreasing = TRUE) %>% head(1)
+}
+
+out <- tibble(page_rank = names(unlist(page_rank)), 
+              eigen_centrality = names(unlist(eigen_centrality)), 
+              between = names(unlist(between)))
+out <- rotate_df(out)
+
+colnames(out) <-  c("15th century", 
+                         "16th century",
+                         "17th century",
+                         "18th century",
+                         "19th century",
+                         "20th century")
+kable(out)
+              
+```

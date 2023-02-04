@@ -1,0 +1,19 @@
+---
+title: "Assignment 1"
+author: "Smitesh Patil"
+date: '2023-02-04'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+df <- read.csv("Counsumer_Price_Index.csv")
+
+
+View(df["year" %in% 2021])
+```

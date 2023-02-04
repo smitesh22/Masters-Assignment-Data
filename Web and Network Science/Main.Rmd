@@ -11,6 +11,7 @@ always_allow_html: true
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 options(knitr.table.format = "latex")
+options(warn=-1)
 
 ```
 
@@ -38,7 +39,9 @@ component sizes.
 ```{r}
 strong_component = as.data.frame(table(factor(components(dib_graph, mode="strong")$csize)))
 names(strong_component)[1] = "Component Size"
-kbl(strong_component)
+
+strong_component %>% gt() %>%
+  tab_header("Strong Number of Components by size of the Compenent")
 ```
 
 Answer: The table above shows strongly connected components in the directed network. There is one component with 5479, 6 and 5 nodes and a distribution of component with sizes varying from 1 to 4.
@@ -48,7 +51,10 @@ Answer: The table above shows strongly connected components in the directed netw
 ```{r}
 weak_component = as.data.frame(table(factor(components(dib_graph, mode="weak")$csize)))
 names(weak_component)[1] = "Component Size"
-kable(weak_component)
+
+weak_component %>% gt() %>%
+  tab_header("Weak Number of Components by size of
+    the Compenent")
 ```
 
 Answer: The table above shows weakly connected components in the directed network. There is one component with 8872 and 4 nodes with 30 weakly connected components of size 2 and 11 components with size 3.
@@ -99,20 +105,26 @@ hist(deg, breaks = (min(deg) - 1):(max(deg)) + 0.5, xlab = "Out-degree",
 ```
 Section 2 -  Bowtie Analysis
 
-2.1 What percentage of the network comprises the strongly connected component, the incomponent, the out-component, and tube.
-
 ```{r}
-### Strongly connected components
-clu <- components(dib_graph, mode = "strong")
+## Strongly connected components
 
-scc_index <- which.max(clu$csize)
-scc <- V(dib_graph)[which(clu$membership == scc_index)]$name
+#get the cluster in strongly connected graph with max
+#size and find the rest of nodes connected thats SCC
+cluster <- components(dib_graph, mode = "strong")
 
-scc_career <- V(dib_graph)[which(clu$membership == scc_index)]$career
-scc_century <- V(dib_graph)[which(clu$membership == scc_index)]$century
+scc_index <- which.max(cluster$csize)
+scc <- V(dib_graph)[which(cluster$membership == scc_index)]$name
+
+# get the career and century for future analysis
+scc_career <- V(dib_graph)[which(cluster$membership == scc_index)]$career
+scc_century <- V(dib_graph)[which(cluster$membership == scc_index)]$century
 
 
-### IN components
+# IN components
+
+#Nodes connected to scc in OUT mode from the scc
+# get the career and century for future analysis
+
 IN_component = c()
 IN_component_career = c()
 IN_component_century = c()
@@ -133,7 +145,11 @@ for (v in non_SCC) {
     }
 }
 
-### OUT components
+# OUT components
+
+#Nodes connected to scc in IN mode from the scc
+# get the career and century for future analysis
+
 OUT_component = c()
 OUT_component_career = c()
 OUT_component_century = c()
@@ -150,7 +166,13 @@ for (v in non_SCC2) {
     }
 }
 
-### Tube components
+# Tube components
+
+# logic : from vertices connected to the in component check the
+# vertices connected to the put component in out mode
+
+# get the career and century for future analysis
+
 tube = c()
 tube_career = c()
 tube_century = c()
@@ -174,49 +196,15 @@ tube_data <- V(dib_graph)[V(dib_graph)$name %in% tube]
 tube_data_career <- tube_data$career
 tube_data_century <- tube_data$century
 
-
-### tendril
-
-in_tendril = c()
-Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component,
-    tube))]$name
-
-
-nodes_IN_component_Tendrils <- vertices[vertices$name %in% c(Tendril, IN_component)]
-g_IN_component_Tendrils <- induced.subgraph(dib_graph, nodes_IN_component_Tendrils)
-
-
-for (v in Tendril) {
-    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
-             to = V(g_IN_component_Tendrils)[IN_component],
-             mode = "in", cutoff = -1)
-
-    if (length(paths) > 0) {
-        in_tendril <- c(in_tendril, v)
-    }
-}
-
-out_tendril <- c()
-nodes_OUT_component_Tendrils <- vertices[vertices$name %in% c(Tendril,
-    OUT_component)]
-
-g_OUT_component_Tendrils <- induced.subgraph(dib_graph, nodes_OUT_component_Tendrils)
-
-for (v in Tendril) {
-    paths <- all_simple_paths(g_OUT_component_Tendrils, from = v,
-             to = V(g_OUT_component_Tendrils)[OUT_component],
-             mode = "out", cutoff = -1)
-
-    if (length(paths) > 0) {
-        out_tendril <- c(out_tendril, v)
-    }
-}
 ```
 
+2.1 What percentage of the network comprises the strongly connected component, the incomponent, the out-component, and tube.
 
 ```{r}
 
 library(dplyr)
+
+# percentages void of tendrils and disconnected vertices
 
 components_prop <- c(length(scc)/length(vertices), length(IN_component)/length(vertices),
     length(OUT_component)/length(vertices), length(tube)/(length(vertices)))
@@ -232,6 +220,8 @@ tube components?
 ```{r}
 library(dplyr)
 
+#list of careers splited by the comma and combined in a single list
+#the  sort by descending order and take top 5
 scc_career <- trimws(unlist(strsplit(scc_career, split = ",")))
 scc_career <- as_tibble(table(scc_career)) %>%
     arrange(desc(n)) %>%
@@ -253,9 +243,6 @@ tube_component_career <- trimws(unlist(strsplit(tube_data_career, split = ",")))
 tube_component_career <- as_tibble(table(tube_component_career)) %>%
     arrange(desc(n)) %>%
     head(5)
-```
-
-```{r}
 
 names(scc_career)[1] <- "SCC career"
 names(IN_component_career)[1] <- "In career"
@@ -266,7 +253,6 @@ names(scc_career)[2] <- "SCC Count"
 names(IN_component_career)[2] <- "In Count"
 names(OUT_component_career)[2] <- "Out Count"
 names(tube_component_career)[2] <- "Tube Count"
-
 
 first_table <- cbind(scc_career, IN_component_career) %>%
     gt() %>%
@@ -279,7 +265,6 @@ second_table <- cbind(OUT_component_career, tube_component_career) %>%
     tab_header("Top Five Career in OUT Component and Tube") %>%
     tab_spanner(label = "OUT Component", columns = c("Out career", "Out Count")) %>%
     tab_spanner(label = "Tube Component", columns = c("Tube career", "Tube Count"))
-
 first_table
 second_table
 ```
@@ -290,6 +275,9 @@ and tube components?
 ```{r}
 
 library(dplyr)
+
+#list of centuries in single list the  sort by descending 
+#order and take top 5
 
 scc_century <- as_tibble(table(scc_century)) %>%
     arrange(desc(n)) %>%
@@ -327,6 +315,159 @@ cbind(scc_century, IN_component_century, OUT_component_century, tube_component_c
     tab_spanner(label = "Tube Component", columns = c("Tube century", "Tube count"))
 ```
 
+2.5 Write R code to detect whether there are tendrils connecting to the
+in-component and tendrils connecting from the out-component. 
+Show that your code is working correctly and can find tendrils accurately 
+where they are present in a network.
+
+1. Writing code to detect in and out tendril and check it initally on week 2 
+lab data then apply the code on the dib graph
+
+```{r}
+
+### Tendril detection on graph from week2 lab
+
+# week 2 code
+
+scc_comp <- c("Maria","John", "Sue", "Maria", "Sue", "John", 
+              "Zoe","Sue", "John", "Zoe","John","Paul", "Paul","Zoe")
+
+# out-component
+out_comp <- c("Peter", "Petra", "Petra", "Greta", "Petra", "Ina", 
+              "Petra","Carlos", "Carlos","Owen","Carlos","Noel", 
+              "Carlos","Mark")
+
+# in -component
+in_comp <- c("Jane", "Rose", "Rose", "Sean", "Rose", "Steve", "Sean","Steve", "Sean","Karen")
+
+# tube component
+tube_comp<- c("Una","Vera","Vera","Con", "Una","Nora", "Nora","Con")
+
+# isolated component
+
+iso1 <-c("Tobias", "Shirvo","Shirvo", "Lucy", "Lucy", "Tobias", "Lucy", "Pam")
+
+iso2 <-c("Ron", "Joey","Joey", "Tadhg", "Ron", "Ken","Ken", "Mags")
+
+
+# create a vector of edges between the components
+
+# from in_component to scc
+in_scc<- c("Steve","Maria", "Karen","Sue")
+# from scc to out_component
+scc_out<- c("Paul","Peter", "Paul","Greta")
+# from in_component to tube
+in_tube<-c("Sean","Una")
+# from tube to out_component
+tube_out<-c("Con","Owen")
+
+# make the graph based on the component vertices
+g<-make_graph(c(scc_comp, out_comp, in_comp, tube, iso1, iso2),directed=T)
+
+
+# adding a in-tendril Jane -> Smitesh Patil
+g <- g + vertices("Smitesh Patil")
+g <- g + edges("Jane", "Smitesh Patil")
+
+# adding a out-tendril Patil Smitesh -> Peter
+g <- g + vertices("Patil Smitesh")
+g <- g + edges("Patil Smitesh", "Peter")
+
+vertices <- V(g)
+
+# pos_tendril(possible tendril) containes vertices that are not in scc, 
+#in, out, tube can contain disconnected vertices
+in_tendril = c()
+pos_tendril = vertices[!(vertices$name %in% c(scc_comp, in_comp, out_comp,
+    tube_comp))]$name
+
+
+# create a subgraph that contains just the In-component and possible
+#tendril
+
+nodes_IN_component_Tendrils <- vertices[vertices$name %in% c(pos_tendril, in_comp)]
+g_IN_component_Tendrils <- induced.subgraph(g, nodes_IN_component_Tendrils)
+
+
+# check the nodes in the subgrah from in component to the possible
+# tendril
+for (v in pos_tendril) {
+    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
+             to = V(g_IN_component_Tendrils)[in_comp],
+             mode = "in", cutoff = -1)
+
+    if (length(paths) > 0) {
+        in_tendril <- c(in_tendril, v)
+    }
+}
+
+# check the nodes in the subgrah from possible tendril to the out
+# component
+
+out_tendril <- c()
+
+nodes_OUT_component_Tendrils <- vertices[vertices$name %in% c(pos_tendril,
+    out_comp)]
+
+g_OUT_component_Tendrils <- induced.subgraph(g, nodes_OUT_component_Tendrils)
+for (v in pos_tendril) {
+    paths <- all_simple_paths(g_OUT_component_Tendrils, from = v,
+             to = V(g_OUT_component_Tendrils)[out_comp],
+             mode = "out", cutoff = -1)
+    if (length(paths) > 0) {
+        out_tendril <- c(out_tendril, v)
+    }
+}
+
+cat("IN Tendril detected ", in_tendril)
+cat("OUT Tendril detected ",out_tendril)
+```
+
+```{r}
+### tendril detection from code above for dib_graph
+
+vertices = V(dib_graph)
+
+in_tendril = c()
+Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component,
+    tube))]$name
+
+
+nodes_IN_component_Tendrils <- vertices[vertices$name %in% c(Tendril, IN_component)]
+g_IN_component_Tendrils <- induced.subgraph(dib_graph, nodes_IN_component_Tendrils)
+
+
+for (v in Tendril) {
+    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
+             to = V(g_IN_component_Tendrils)[IN_component],
+             mode = "in", cutoff = -1)
+
+    if (length(paths) > 0) {
+        in_tendril <- c(in_tendril, v)
+    }
+}
+
+out_tendril <- c()
+nodes_OUT_component_Tendrils <- vertices[vertices$name %in% c(Tendril,
+    OUT_component)]
+
+g_OUT_component_Tendrils <- induced.subgraph(dib_graph, nodes_OUT_component_Tendrils)
+
+for (v in Tendril) {
+    paths <- all_simple_paths(g_OUT_component_Tendrils, from = v,
+             to = V(g_OUT_component_Tendrils)[OUT_component],
+             mode = "out", cutoff = -1)
+
+    if (length(paths) > 0) {
+        out_tendril <- c(out_tendril, v)
+    }
+}
+
+cat("There are ", length(in_tendril), " vertices in IN Tendrils")
+
+cat("There are ", length(out_tendril), " vertices in OUT Tendrils")
+```
+
 Section 3 - Centrality /Authority
 
 
@@ -349,18 +490,14 @@ century_data <- list(
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 18]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 19]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 20]))
-
-
 page_rank <- vector(mode = "list", length = 12)
 authority <- vector(mode = "list", length = 12)
 eigen_centrality <- vector(mode = "list", length = 12)
 between <- vector(mode = "list", length = 12)
 close <- vector(mode = "list", length = 12)
-
 century_list <- c("9th century", "10th century", "11th century", "12th century",
     "13th century", "14th century", "15th century", "16th century", "17th century",
     "18th century", "19th century", "20th century")
-
 names(century_data) <- century_list
 
 
@@ -392,15 +529,12 @@ for (i in 1:length(century_data)) {
         head(1)
     authority[[i]] <- paste(names(authority[[i]]), "\n", round(authority[[i]],
         2))
+}
     
 
-}
-```
-
-```{r}
-out <- tibble("Page Rank" = unlist(page_rank), 
-              "Eigen Centrality" = unlist(eigen_centrality),
-              "Between Centrality" = unlist(authority))
+out <- tibble("Authority" = unlist(authority), 
+              "Page Rank" = unlist(page_rank),
+              "Betweeness" = unlist(between))
 out <- rotate_df(out)
 
 colnames(out) <- century_list
@@ -429,53 +563,36 @@ third
 fourth
 ```
 
+3.2 Explain what data you have used to determine influence in each century.
 
+Answer:
 
+First, subgraphs were created for each century so that the people from
+other centuries couldn't influence the centrality scores for the 
+second century.
 
-```{r}
+Second, the connections (directed edges) are used to determin the influence
+of people in each century.
 
-dib_graph <- dib_graph + vertices("Smitesh Patil")
-dib_graph <- dib_graph + edges("Margaret Alice Joyce", "Smitesh Patil")
+3.3 Say why the centrality measures you have used are appropriate. 
+Your table should look something like the one shown below. 
+You are expected to create it computationally using a dataframe or 
+tibble to hold the data and a table library such as kableExtra to 
+render the table.
 
-vertices <- V(dib_graph)
+Answer :
 
-in_tendril = c()
-Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component,
-    tube))]$name
+1. Authority Centrality : Authority centrality measures the importance of 
+a node/person depending on the number of nodes/people pointing towards it (i.e. the 
+in-degree of node). Basic idea is that if many nodes point to a node the it 
+is likely to be an important node. 
 
+2. Page Rank Centrality : As opposed to authority centrality Page Rank centrality ranks the importance of nodes based on its connection to other nodes bases on 
+their importance. Page Rank is an iterative algorithm that ranks all nodes 
+during each iteration and coverges to a optimal solution after a set no of 
+iterations.
 
-nodes_IN_component_Tendrils <- vertices[vertices$name %in% c(Tendril, IN_component)]
-g_IN_component_Tendrils <- induced.subgraph(dib_graph, nodes_IN_component_Tendrils)
-
-
-for (v in Tendril) {
-    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
-             to = V(g_IN_component_Tendrils)[IN_component],
-             mode = "in", cutoff = -1)
-
-    if (length(paths) > 0) {
-        in_tendril <- c(in_tendril, v)
-    }
-}
-
-
-for (v in in_tendril) {
-    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
-             to = V(g_IN_component_Tendrils)[IN_component],
-             mode = "out", cutoff = -1)
-
-    if (length(paths) > 0) {
-        in_tendril <- in_tendril[!v]
-    }
-}
-
-for (v in out_tendril) {
-    paths <- all_simple_paths(g_OUT_component_Tendrils, from = v, 
-             to = V(g_OUT_component_Tendrils)[OUT_component],
-             mode = "in", cutoff = -1)
-
-    if (length(paths) > 0) {
-        out_tendril <- out_tendril[!v]
-    }
-}
-```
+3. Betweenness Centraility : Betweenness measures the number of times a node 
+lies in the shortest path between other nodes of the network. Basically, if
+a person lies as a common link between other peoples connection. He/she has 
+got to be a influential person.

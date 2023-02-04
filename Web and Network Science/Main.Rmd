@@ -103,34 +103,34 @@ Section 2 -  Bowtie Analysis
 
 ```{r}
 ### Strongly connected components
-clu<-components(dib_graph,mode = "strong")
+clu <- components(dib_graph, mode = "strong")
 
 scc_index <- which.max(clu$csize)
-scc<- V(dib_graph)[which(clu$membership==scc_index)]$name
+scc <- V(dib_graph)[which(clu$membership == scc_index)]$name
 
-scc_career<- V(dib_graph)[which(clu$membership==scc_index)]$career
-scc_century<- V(dib_graph)[which(clu$membership==scc_index)]$century
+scc_career <- V(dib_graph)[which(clu$membership == scc_index)]$career
+scc_century <- V(dib_graph)[which(clu$membership == scc_index)]$century
 
 
 ### IN components
-IN_component=c()
+IN_component = c()
 IN_component_career = c()
 IN_component_century = c()
-vertices<-V(dib_graph)
+vertices <- V(dib_graph)
 
-non_SCC <-vertices[!(vertices$name %in% scc)]
+non_SCC <- vertices[!(vertices$name %in% scc)]
 
-for (v in non_SCC){
-  
-  dist<- bfs(dib_graph, root=v, mode="out",unreachable =F, dist=T)$dist
-  
-  connected_to_SCC<-!is.nan(dist[scc])
-  
-  if(TRUE %in% connected_to_SCC){
-    IN_component<-c(IN_component,V(dib_graph)[v]$name)
-    IN_component_career <- c(IN_component_career, V(dib_graph)[v]$career)
-    IN_component_century <- c(IN_component_century, V(dib_graph)[v]$century)
-  }
+for (v in non_SCC) {
+
+    dist <- bfs(dib_graph, root = v, mode = "out", unreachable = F, dist = T)$dist
+
+    connected_to_SCC <- !is.nan(dist[scc])
+
+    if (TRUE %in% connected_to_SCC) {
+        IN_component <- c(IN_component, V(dib_graph)[v]$name)
+        IN_component_career <- c(IN_component_career, V(dib_graph)[v]$career)
+        IN_component_century <- c(IN_component_century, V(dib_graph)[v]$century)
+    }
 }
 
 ### OUT components
@@ -140,14 +140,14 @@ OUT_component_century = c()
 
 non_SCC2 <- vertices[!(vertices$name %in% c(scc, IN_component))]
 
-for (v in non_SCC2){
-  dist<- bfs(dib_graph, root=v, mode="in",unreachable =F, dist=T)$dist
-  connected_to_non_SCC<-!is.nan(dist[scc])
-  if(TRUE %in% connected_to_non_SCC){
-    OUT_component<-c(OUT_component,V(dib_graph)[v]$name)
-    OUT_component_career <- c(OUT_component_career, V(dib_graph)[v]$career)
-    OUT_component_century <- c(OUT_component_century, V(dib_graph)[v]$century)
-  }
+for (v in non_SCC2) {
+    dist <- bfs(dib_graph, root = v, mode = "in", unreachable = F, dist = T)$dist
+    connected_to_non_SCC <- !is.nan(dist[scc])
+    if (TRUE %in% connected_to_non_SCC) {
+        OUT_component <- c(OUT_component, V(dib_graph)[v]$name)
+        OUT_component_career <- c(OUT_component_career, V(dib_graph)[v]$career)
+        OUT_component_century <- c(OUT_component_century, V(dib_graph)[v]$century)
+    }
 }
 
 ### Tube components
@@ -155,17 +155,18 @@ tube = c()
 tube_career = c()
 tube_century = c()
 nodes_minus_SCC <- vertices[!(vertices$name %in% scc)]
-g_minus_SCC<-induced_subgraph(dib_graph ,nodes_minus_SCC)
+g_minus_SCC <- induced_subgraph(dib_graph, nodes_minus_SCC)
 out = c()
 
-for (v in V(g_minus_SCC)[IN_component]){
-  paths<-all_simple_paths(g_minus_SCC, from=v,to = V(g_minus_SCC)[OUT_component], mode = "out", cutoff = -1)
-  tube<-c(tube, names(unlist(paths)))
+for (v in V(g_minus_SCC)[IN_component]) {
+    paths <- all_simple_paths(g_minus_SCC, from = v, to = V(g_minus_SCC)[OUT_component],
+        mode = "out", cutoff = -1)
+    tube <- c(tube, names(unlist(paths)))
 }
 
-tube<-unique(tube)
+tube <- unique(tube)
 
-tube<-tube[!(tube %in% c(IN_component,OUT_component))]
+tube <- tube[!(tube %in% c(IN_component, OUT_component))]
 
 
 tube_data = c()
@@ -177,32 +178,38 @@ tube_data_century <- tube_data$century
 ### tendril
 
 in_tendril = c()
-Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component, tube))]$name
+Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component,
+    tube))]$name
 
 
 nodes_IN_component_Tendrils <- vertices[vertices$name %in% c(Tendril, IN_component)]
 g_IN_component_Tendrils <- induced.subgraph(dib_graph, nodes_IN_component_Tendrils)
 
 
-for (v in Tendril){
-  paths <- all_simple_paths(g_IN_component_Tendrils, from=v,to = V(g_IN_component_Tendrils)[IN_component], mode = "in", cutoff = -1)
-  
-  if(length(paths) > 0){
-    in_tendril <- c(in_tendril, v)
-  }
+for (v in Tendril) {
+    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
+             to = V(g_IN_component_Tendrils)[IN_component],
+             mode = "in", cutoff = -1)
+
+    if (length(paths) > 0) {
+        in_tendril <- c(in_tendril, v)
+    }
 }
 
 out_tendril <- c()
-nodes_OUT_component_Tendrils <- vertices[vertices$name %in% c(Tendril, OUT_component)]
+nodes_OUT_component_Tendrils <- vertices[vertices$name %in% c(Tendril,
+    OUT_component)]
 
 g_OUT_component_Tendrils <- induced.subgraph(dib_graph, nodes_OUT_component_Tendrils)
 
-for (v in Tendril){
-  paths <- all_simple_paths(g_OUT_component_Tendrils, from=v,to = V(g_OUT_component_Tendrils)[OUT_component], mode = "out", cutoff = -1)
-  
-  if (length(paths) > 0){
-    out_tendril <- c(out_tendril, v)
-  }
+for (v in Tendril) {
+    paths <- all_simple_paths(g_OUT_component_Tendrils, from = v,
+             to = V(g_OUT_component_Tendrils)[OUT_component],
+             mode = "out", cutoff = -1)
+
+    if (length(paths) > 0) {
+        out_tendril <- c(out_tendril, v)
+    }
 }
 ```
 
@@ -211,7 +218,8 @@ for (v in Tendril){
 
 library(dplyr)
 
-components_prop <- c(length(scc)/length(vertices), length(IN_component)/length(vertices), length(OUT_component)/length(vertices), length(tube)/(length(vertices)))
+components_prop <- c(length(scc)/length(vertices), length(IN_component)/length(vertices),
+    length(OUT_component)/length(vertices), length(tube)/(length(vertices)))
 
 names(components_prop) <- c("SCC", "IN Component", "OUT component", "Tube")
 
@@ -225,18 +233,26 @@ tube components?
 library(dplyr)
 
 scc_career <- trimws(unlist(strsplit(scc_career, split = ",")))
-scc_career <- as_tibble(table(scc_career)) %>% arrange(desc(n)) %>% head(5)
+scc_career <- as_tibble(table(scc_career)) %>%
+    arrange(desc(n)) %>%
+    head(5)
 
 
 IN_component_career <- trimws(unlist(strsplit(IN_component_career, split = ",")))
-IN_component_career <- as_tibble(table(IN_component_career)) %>% arrange(desc(n)) %>% head(5)
+IN_component_career <- as_tibble(table(IN_component_career)) %>%
+    arrange(desc(n)) %>%
+    head(5)
 
 OUT_component_career <- trimws(unlist(strsplit(OUT_component_career, split = ",")))
-OUT_component_career <- as_tibble(table(OUT_component_career)) %>% arrange(desc(n)) %>% head(5)
+OUT_component_career <- as_tibble(table(OUT_component_career)) %>%
+    arrange(desc(n)) %>%
+    head(5)
 
 
 tube_component_career <- trimws(unlist(strsplit(tube_data_career, split = ",")))
-tube_component_career <- as_tibble(table(tube_component_career)) %>% arrange(desc(n)) %>% head(5)
+tube_component_career <- as_tibble(table(tube_component_career)) %>%
+    arrange(desc(n)) %>%
+    head(5)
 ```
 
 ```{r}
@@ -252,31 +268,21 @@ names(OUT_component_career)[2] <- "Out Count"
 names(tube_component_career)[2] <- "Tube Count"
 
 
-out <- cbind(scc_career, IN_component_career) %>%
-  gt() %>%
-  tab_header("Top Five Career in SCC and IN Component") %>%
-  tab_spanner(
-    label = "SCC",
-    columns = c("SCC career", "SCC Count")
-  ) %>%
-  tab_spanner(
-    label = "IN Component",
-    columns = c("In career","In Count")
-  )
-out 
+first_table <- cbind(scc_career, IN_component_career) %>%
+    gt() %>%
+    tab_header("Top Five Career in SCC and IN Component") %>%
+    tab_spanner(label = "SCC", columns = c("SCC career", "SCC Count")) %>%
+    tab_spanner(label = "IN Component", columns = c("In career", "In Count"))
 
-cbind(OUT_component_career, tube_component_career) %>% gt() %>%
-  tab_header("Top Five Career in OUT Component and Tube") %>%
-  tab_spanner(
-    label = "OUT Component",
-    columns = c("Out career","Out Count")
-  ) %>%
-  tab_spanner(
-    label = "Tube Component",
-    columns = c("Tube career","Tube Count")
-  )
+second_table <- cbind(OUT_component_career, tube_component_career) %>%
+    gt() %>%
+    tab_header("Top Five Career in OUT Component and Tube") %>%
+    tab_spanner(label = "OUT Component", columns = c("Out career", "Out Count")) %>%
+    tab_spanner(label = "Tube Component", columns = c("Tube career", "Tube Count"))
+
+first_table
+second_table
 ```
-
 
 2.3 What are the top five centuries represented in the in-component, out-component, scc
 and tube components?
@@ -285,13 +291,21 @@ and tube components?
 
 library(dplyr)
 
-scc_century <- as_tibble(table(scc_century)) %>% arrange(desc(n)) %>% head()
+scc_century <- as_tibble(table(scc_century)) %>%
+    arrange(desc(n)) %>%
+    head()
 
-IN_component_century <- as_tibble(table(IN_component_century)) %>% arrange(desc(n)) %>% head()
+IN_component_century <- as_tibble(table(IN_component_century)) %>%
+    arrange(desc(n)) %>%
+    head()
 
-OUT_component_century <- as_tibble(table(OUT_component_century)) %>% arrange(desc(n)) %>% head()
+OUT_component_century <- as_tibble(table(OUT_component_century)) %>%
+    arrange(desc(n)) %>%
+    head()
 
-tube_component_century <- as_tibble(table(tube_data_century)) %>% arrange(desc(n)) %>% head()
+tube_component_century <- as_tibble(table(tube_data_century)) %>%
+    arrange(desc(n)) %>%
+    head()
 
 names(scc_century)[1] <- "SCC century"
 names(IN_component_century)[1] <- "In century"
@@ -305,24 +319,12 @@ names(tube_component_century)[2] <- "Tube count"
 
 
 cbind(scc_century, IN_component_century, OUT_component_century, tube_component_century) %>%
-  gt() %>%
-  tab_header("Top Five Century in SCC, IN Component, OUT Component, Tube") %>%
-  tab_spanner(
-    label = "SCC",
-    columns = c("SCC century", "SCC count")
-  ) %>%
-  tab_spanner(
-    label = "IN Component",
-    columns = c("In century","In count")
-  ) %>%
-  tab_spanner(
-    label = "OUT Component",
-    columns = c("Out century","Out count")
-  ) %>%
-  tab_spanner(
-    label = "Tube Component",
-    columns = c("Tube century","Tube count")
-  )
+    gt() %>%
+    tab_header("Top Five Century in SCC, IN Component, OUT Component, Tube") %>%
+    tab_spanner(label = "SCC", columns = c("SCC century", "SCC count")) %>%
+    tab_spanner(label = "IN Component", columns = c("In century", "In count")) %>%
+    tab_spanner(label = "OUT Component", columns = c("Out century", "Out count")) %>%
+    tab_spanner(label = "Tube Component", columns = c("Tube century", "Tube count"))
 ```
 
 Section 3 - Centrality /Authority
@@ -332,126 +334,99 @@ Section 3 - Centrality /Authority
 measures of centrality/authority
 
 ```{r}
-
 library(sjmisc)
   
 century_data <- list(
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 9]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 10]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 11]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 12]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 13]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 14]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 15]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 16]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 17]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 18]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 19]),
-                     
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 20]))
 
 
 page_rank <- vector(mode = "list", length = 12)
-katz_centrality <- vector(mode = "list", length = 12)
+authority <- vector(mode = "list", length = 12)
 eigen_centrality <- vector(mode = "list", length = 12)
 between <- vector(mode = "list", length = 12)
-close <- vector(mode = "list", length = 12) 
+close <- vector(mode = "list", length = 12)
 
-century_list <- c("9th century",
-                  "10th century",
-                  "11th century",
-                  "12th century",
-                  "13th century",
-                  "14th century",
-                  "15th century", 
-                  "16th century",
-                  "17th century",
-                  "18th century",
-                  "19th century",
-                  "20th century")
+century_list <- c("9th century", "10th century", "11th century", "12th century",
+    "13th century", "14th century", "15th century", "16th century", "17th century",
+    "18th century", "19th century", "20th century")
 
 names(century_data) <- century_list
 
 
-for(i in 1:length(century_data)){
-  page_rank[[i]] <- page_rank(century_data[[i]],  directed = TRUE, damping = 0.85)$vector
-  page_rank[[i]] <- page_rank[[i]] %>% sort(decreasing = TRUE) %>% head(1)
-  page_rank[[i]] <- paste(names(page_rank[[i]]),"\n",round(page_rank[[i]],2))
-  eigen_centrality[[i]] <- eigen_centrality(century_data[[i]], weights=NA)$vector
-  eigen_centrality[[i]] <- eigen_centrality[[i]] %>% sort(decreasing = TRUE) %>% head(1)
-  eigen_centrality[[i]] <- paste(names(eigen_centrality[[i]]),"\n",round(eigen_centrality[[i]],2))
-  between[[i]] <- betweenness(century_data[[i]], weights=NA)
-  between[[i]] <- between[[i]] %>% sort(decreasing = TRUE) %>% head(1)
-  between[[i]] <- paste(names(between[[i]]),"\n",round(between[[i]],2))
+for (i in 1:length(century_data)) {
+    page_rank[[i]] <- page_rank(century_data[[i]], directed = TRUE, damping = 0.85)$vector
+    page_rank[[i]] <- page_rank[[i]] %>%
+        sort(decreasing = TRUE) %>%
+        head(1)
+    page_rank[[i]] <- paste(names(page_rank[[i]]), "\n", round(page_rank[[i]],
+        2))
+    
+    eigen_centrality[[i]] <- eigen_centrality(century_data[[i]], weights = NA)$vector
+    eigen_centrality[[i]] <- eigen_centrality[[i]] %>%
+        sort(decreasing = TRUE) %>%
+        head(1)
+    eigen_centrality[[i]] <- paste(names(eigen_centrality[[i]]), "\n",
+        round(eigen_centrality[[i]], 2))
+    
+    between[[i]] <- betweenness(century_data[[i]], weights = NA)
+    between[[i]] <- between[[i]] %>%
+        sort(decreasing = TRUE) %>%
+        head(1)
+    between[[i]] <- paste(names(between[[i]]), "\n", round(between[[i]],
+        2))
+    
+    authority[[i]] <- authority_score(century_data[[i]], scale = TRUE)$vector
+    authority[[i]] <- authority[[i]] %>%
+        sort(decreasing = TRUE) %>%
+        head(1)
+    authority[[i]] <- paste(names(authority[[i]]), "\n", round(authority[[i]],
+        2))
+    
 
 }
 ```
 
 ```{r}
 out <- tibble("Page Rank" = unlist(page_rank), 
-              "Eigen Centrality" = unlist(eigen_centrality), 
-              "Between" = unlist(between))
+              "Eigen Centrality" = unlist(eigen_centrality),
+              "Between Centrality" = unlist(authority))
 out <- rotate_df(out)
 
 colnames(out) <- century_list
 
 out <- as.data.frame(out)
 
-# kbl(out[c('9th century', '10th century', '11th century', '12th century')], 
-#     caption = "1. Centrality for centuries from 9th to 12th", format = "latex") %>%
-#   kable_styling(full_width = T, latex_options =  "striped", position = "center") %>%
-#   kable_material()
-# 
-# kbl(out[c('10th century', '11th century', '12th century', '13th century')],
-#     caption = "2. Centrality for centuries from 10th to 13th", format = "latex") %>%
-#   kable_styling(full_width = T, latex_options =  "striped", position = "center") %>%
-#   kable_classic_2()
-# 
-# kbl(out[c('14th century', '15th century', '16th century', '17th century')],
-#     caption = "3. Centrality for centuries from 14th to 17th", format = "latex") %>%
-#   kable_styling(full_width = T, latex_options =  "striped", position = "center") %>%
-#   kable_minimal()
+first <- out[c("9th century", "10th century", "11th century", "12th century")] %>%
+    gt(rownames_to_stub = TRUE) %>%
+    tab_header(title = "1. Centrality for centuries from 9th to 12th")
 
-# kbl(out[c('18th century', '19th century', '20th century')],
-#     caption = "4. Centrality for centuries from 18th to 20th", format = "latex") %>%
-#   kable_styling(full_width = T, latex_options =  "striped", position = "center") %>%
-#   kable_paper()
+second <- out[c("10th century", "11th century", "12th century", "13th century")] %>%
+    gt(rownames_to_stub = TRUE) %>%
+    tab_header(title = "2. Centrality for centuries from 10th to 13th")
 
-out[c('9th century', '10th century', '11th century', '12th century')] %>%
-  gt() %>%
-  tab_header(
-    title = "1. Centrality for centuries from 9th to 12th"
-  )
-  
-out[c('10th century', '11th century', '12th century', '13th century')] %>%
-      gt() %>%
-  tab_header(
-    title = "2. Centrality for centuries from 10th to 13th"
-  )
+third <- out[c("14th century", "15th century", "16th century", "17th century")] %>%
+    gt(rownames_to_stub = TRUE) %>%
+    tab_header(title = "3. Centrality for centuries from 14th to 17th")
 
-out[c('14th century', '15th century', '16th century', '17th century')] %>%
-      gt() %>%
-  tab_header(
-    title = "3. Centrality for centuries from 14th to 17th"
-  )
-    
-out[c('18th century', '19th century', '20th century')] %>%
-      gt() %>%
-  tab_header(
-    title = "4. Centrality for centuries from 18th to 20th"
-  )
+fourth <- out[c("18th century", "19th century", "20th century")] %>%
+    gt(rownames_to_stub = TRUE) %>%
+    tab_header(title = "4. Centrality for centuries from 18th to 20th")
 
-
+first
+second
+third
+fourth
 ```
 
 
@@ -459,41 +434,48 @@ out[c('18th century', '19th century', '20th century')] %>%
 
 ```{r}
 
-dib_graph<- dib_graph + vertices("Smitesh Patil")
-dib_graph<- dib_graph + edges("Margaret Alice Joyce","Smitesh Patil")
+dib_graph <- dib_graph + vertices("Smitesh Patil")
+dib_graph <- dib_graph + edges("Margaret Alice Joyce", "Smitesh Patil")
 
 vertices <- V(dib_graph)
 
 in_tendril = c()
-Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component, tube))]$name
+Tendril = vertices[!(vertices$name %in% c(scc, IN_component, OUT_component,
+    tube))]$name
 
 
 nodes_IN_component_Tendrils <- vertices[vertices$name %in% c(Tendril, IN_component)]
 g_IN_component_Tendrils <- induced.subgraph(dib_graph, nodes_IN_component_Tendrils)
 
 
-for (v in Tendril){
-  paths <- all_simple_paths(g_IN_component_Tendrils, from=v,to = V(g_IN_component_Tendrils)[IN_component], mode = "in", cutoff = -1)
-  
-  if(length(paths) > 0){
-    in_tendril <- c(in_tendril, v)
-  }
+for (v in Tendril) {
+    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
+             to = V(g_IN_component_Tendrils)[IN_component],
+             mode = "in", cutoff = -1)
+
+    if (length(paths) > 0) {
+        in_tendril <- c(in_tendril, v)
+    }
 }
 
 
-for (v in in_tendril){
-  paths <- all_simple_paths(g_IN_component_Tendrils, from= v, to = V(g_IN_component_Tendrils)[IN_component], mode = "out", cutoff = -1)
-  
-  if(length(paths) > 0){
-    in_tendril <- in_tendril[!v]
-  }
+for (v in in_tendril) {
+    paths <- all_simple_paths(g_IN_component_Tendrils, from = v, 
+             to = V(g_IN_component_Tendrils)[IN_component],
+             mode = "out", cutoff = -1)
+
+    if (length(paths) > 0) {
+        in_tendril <- in_tendril[!v]
+    }
 }
 
-for (v in out_tendril){
-  paths <- all_simple_paths(g_OUT_component_Tendrils, from= v, to = V(g_OUT_component_Tendrils)[OUT_component], mode = "in", cutoff = -1)
-  
-  if(length(paths) > 0){
-    out_tendril <- out_tendril[!v]
-  }
+for (v in out_tendril) {
+    paths <- all_simple_paths(g_OUT_component_Tendrils, from = v, 
+             to = V(g_OUT_component_Tendrils)[OUT_component],
+             mode = "in", cutoff = -1)
+
+    if (length(paths) > 0) {
+        out_tendril <- out_tendril[!v]
+    }
 }
 ```

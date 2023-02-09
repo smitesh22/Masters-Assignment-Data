@@ -1,0 +1,61 @@
+---
+title: "Main"
+author: "Smitesh Patil"
+date: "2023-02-09"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(gghighlight)
+
+df <- read.csv("Counsumer_Price_Index.csv")
+
+df <- df %>%
+  rename(Location = ï..Location)
+
+sav <- df %>%
+  filter(Location %in% c("IRL", "CAN", "AUS",
+                            "USA", "FRA", "DEU",
+                            "ESP", "ITA", "NLD", "OECD")) %>%
+  filter(Time == "2022-12") %>%
+  mutate(Location = recode(Location, 
+                           "IRL" = "IRELAND",
+                           "AUS" = "AUSTRALIA",
+                           "USA" = "UNITED STATES",
+                           "DEU" = "GERMANY",
+                           "CAN" = "CANADA",
+                           "ESP" = "SPAIN",
+                           "ITA" = "ITALY",
+                           "FRA" = "FRANCE",
+                           "NLD" = "NETHERLANDS")) %>%
+  filter(Subject != "Energy")
+
+
+order <- sav %>% 
+  group_by(Location) %>% 
+  summarise(sum = sum(Percentage)) %>% 
+  arrange(desc(sum)) %>% 
+  select(Location) %>%
+  unlist() %>%
+  unname()
+```
+
+```{r}
+sav %>%
+  ggplot(aes(x = factor(Location, order), y = Percentage, 
+                        fill = ifelse(Location == "IRELAND","red", "blue"))) +
+  geom_col(linewidth=0.2, position="dodge")+
+  xlab("Countries --> ") +
+  ylab("Increase in CPI by % -->")+
+  facet_grid(~Subject)+
+  theme_classic()+
+  coord_flip()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        legend.position = "top")
+```

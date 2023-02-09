@@ -1,21 +1,25 @@
 ---
 title: "Assignment 1"
 author: "Smitesh Patil"
-date: '2023-02-01'
+date: "2023-02-07"
 output:
-  pdf_document: default
+  pdf_document: 
+    latex_engine: xelatex
   word_document: default
-always_allow_html: true
+  html_document:
+    df_print: paged
+always_allow_html: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 options(knitr.table.format = "latex")
 options(warn=-1)
-
 ```
-
-1. Basic measures
+# Section 1. Basic measures
+\
+\
+\
 
 ```{r}
 library(igraph)
@@ -25,17 +29,16 @@ dib_graph<-read.graph("dib2.graphml",format="graphml")
 
 ```
 
-1.1 Give the number of nodes and edges
+### 1.1 Give the number of nodes and edges
 
 ```{r}
 cat("num vertices:", vcount(dib_graph), "\n")
 
 cat("num edges :", ecount(dib_graph), "\n")
 ```
-1.2 Is the network strongly or weakly connected. If neither, what is the distribution of
-component sizes.
+### Is the network strongly or weakly connected. If neither, what is the distribution of component sizes.
 
-1. Strongly connected components
+#### 1. Strongly connected components
 ```{r}
 strong_component = as.data.frame(table(factor(components(dib_graph, mode="strong")$csize)))
 names(strong_component)[1] = "Component Size"
@@ -46,7 +49,7 @@ strong_component %>% gt() %>%
 
 Answer: The table above shows strongly connected components in the directed network. There is one component with 5479, 6 and 5 nodes and a distribution of component with sizes varying from 1 to 4.
 
-2. Weakly connected components
+### 2. Weakly connected components
 
 ```{r}
 weak_component = as.data.frame(table(factor(components(dib_graph, mode="weak")$csize)))
@@ -59,25 +62,25 @@ weak_component %>% gt() %>%
 
 Answer: The table above shows weakly connected components in the directed network. There is one component with 8872 and 4 nodes with 30 weakly connected components of size 2 and 11 components with size 3.
 
-1.3 What is the diameter of the network ?
+### 1.3 What is the diameter of the network ?
 
 ```{r}
 cat("The diameter of the network is : ", diameter(dib_graph, directed = T,
     unconnected = TRUE, weights = NA), "\n")
 ```
-1.4 What is the average path length of the network ?
+### 1.4 What is the average path length of the network ?
 
 ```{r}
 cat("The average path length of the network :", mean_distance(dib_graph,
     directed = T), "\n")
 ```
-1.5 What is the clustering coefficient of the network ?
+### 1.5 What is the clustering coefficient of the network ?
 
 ```{r}
 cat("The clustering coeff of the graph is :", transitivity(dib_graph, type = "localaverage"),
     "\n")
 ```
-1.6 What is the in- and out-degree distribution ?
+### 1.6 What is the in- and out-degree distribution ?
 
 ```{r}
 deg <- degree(dib_graph, mode = "in")
@@ -86,9 +89,12 @@ cat("The in-degree distribution of the graph varies from ", min(deg), "to ",
 ```
 
 ```{r}
-hist(deg, breaks = (min(deg) - 1):(max(deg)) + 0.5, xlab = "In-degree",
+hist(log(as.data.frame(deg)$deg), breaks = (min(deg)):(max(deg)), xlab = "In-degree",
+    freq = FALSE,
     ylab = "Proportion", main = "Histogram of In-Degree Distribution",
-    border = "black", col = "white", )
+    border = "black", col = "white",
+    xlim = c(0,15),
+    ylim = c(0,0.5))
 ```
 
 ```{r}
@@ -100,10 +106,12 @@ cat("The in-degree distribution of the graph varies from ", min(deg), "to ",
 ```{r}
 
 hist(deg, breaks = (min(deg) - 1):(max(deg)) + 0.5, xlab = "Out-degree",
-    ylab = "Proportion", main = "Histogram of Out-Degree Distribution",
+    ylab = "Number of Nodes", main = "Histogram of Out-Degree Distribution",
     border = "black", col = "white")
 ```
-Section 2 -  Bowtie Analysis
+
+
+# Section 2 -  Bowtie Analysis
 
 ```{r}
 ## Strongly connected components
@@ -198,7 +206,7 @@ tube_data_century <- tube_data$century
 
 ```
 
-2.1 What percentage of the network comprises the strongly connected component, the incomponent, the out-component, and tube.
+### 2.1 What percentage of the network comprises the strongly connected component, the incomponent, the out-component, and tube.
 
 ```{r}
 
@@ -211,11 +219,13 @@ components_prop <- c(length(scc)/length(vertices), length(IN_component)/length(v
 
 names(components_prop) <- c("SCC", "IN Component", "OUT component", "Tube")
 
-kable(components_prop, col.names = "Percentage")
+kable(components_prop, col.names = "Percentage", caption = "Network Composition")
 ```
 
-2.2 What are the top five careers for people in the in-component, out-component, scc and
-tube components?
+### 2.2 What are the top five careers for people in the in-component, out-component, scc and tube components?
+
+\
+\
 
 ```{r}
 library(dplyr)
@@ -269,8 +279,15 @@ first_table
 second_table
 ```
 
-2.3 What are the top five centuries represented in the in-component, out-component, scc
-and tube components?
+
+### 2.3 What are the top five centuries represented in the in-component, out-component, scc and tube components?
+
+#### Code
+
+\
+\
+\
+\
 
 ```{r}
 
@@ -280,20 +297,24 @@ library(dplyr)
 #order and take top 5
 
 scc_century <- as_tibble(table(scc_century)) %>%
-    arrange(desc(n)) %>%
-    head()
+    arrange(desc(n)) %>% 
+    head() %>% 
+    mutate(scc_century = paste(scc_century , "century"))
 
 IN_component_century <- as_tibble(table(IN_component_century)) %>%
     arrange(desc(n)) %>%
-    head()
+    head() %>%
+    mutate(IN_component_century =  paste(IN_component_century, "century"))
 
 OUT_component_century <- as_tibble(table(OUT_component_century)) %>%
     arrange(desc(n)) %>%
-    head()
+    head() %>%
+    mutate(OUT_component_century = paste(OUT_component_century, "century"))
 
 tube_component_century <- as_tibble(table(tube_data_century)) %>%
     arrange(desc(n)) %>%
-    head()
+    head() %>%
+    mutate(tube_data_century = paste(tube_data_century, "century"))
 
 names(scc_century)[1] <- "SCC century"
 names(IN_component_century)[1] <- "In century"
@@ -313,17 +334,17 @@ cbind(scc_century, IN_component_century, OUT_component_century, tube_component_c
     tab_spanner(label = "IN Component", columns = c("In century", "In count")) %>%
     tab_spanner(label = "OUT Component", columns = c("Out century", "Out count")) %>%
     tab_spanner(label = "Tube Component", columns = c("Tube century", "Tube count"))
+
 ```
 
-2.5 Write R code to detect whether there are tendrils connecting to the
-in-component and tendrils connecting from the out-component. 
-Show that your code is working correctly and can find tendrils accurately 
-where they are present in a network.
 
-1. Writing code to detect in and out tendril and check it initally on week 2 
-lab data then apply the code on the dib graph
+### 2.5 Write R code to detect whether there are tendrils connecting to the in-component and tendrils connecting from the out-component. Show that your code is working correctly and can find tendrils accurately where they are present in a network.
+
 
 ```{r}
+### Writing code to detect in and out tendril and check it initally on week 2
+### lab data then apply the code on the dib graph 
+
 
 ### Tendril detection on graph from week2 lab
 
@@ -468,16 +489,21 @@ cat("There are ", length(in_tendril), " vertices in IN Tendrils")
 cat("There are ", length(out_tendril), " vertices in OUT Tendrils")
 ```
 
-Section 3 - Centrality /Authority
+# Section 3 - Centrality /Authority
 
 
-3.1 Produce a table that shows the most influential people in each century using 3 different
-measures of centrality/authority
+### 3.1 Produce a table that shows the most influential people in each century using 3 different measures of centrality/authority
 
 ```{r}
 library(sjmisc)
   
 century_data <- list(
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 1]),
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 4]),
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 5]),
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 6]),
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 7]),
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 8]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 9]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 10]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 11]),
@@ -489,15 +515,18 @@ century_data <- list(
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 17]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 18]),
   induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 19]),
-  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 20]))
-page_rank <- vector(mode = "list", length = 12)
-authority <- vector(mode = "list", length = 12)
-eigen_centrality <- vector(mode = "list", length = 12)
-between <- vector(mode = "list", length = 12)
-close <- vector(mode = "list", length = 12)
-century_list <- c("9th century", "10th century", "11th century", "12th century",
-    "13th century", "14th century", "15th century", "16th century", "17th century",
-    "18th century", "19th century", "20th century")
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 20]),
+  induced.subgraph(dib_graph, V(dib_graph)[V(dib_graph)$century == 21]))
+
+page_rank <- vector(mode = "list", length = 19)
+authority <- vector(mode = "list", length = 19)
+eigen_centrality <- vector(mode = "list", length = 19)
+between <- vector(mode = "list", length = 19)
+close <- vector(mode = "list", length = 19)
+century_list <- c("1st century", "4th century", "5th century", "6th century", 
+                  "7th century", "8th century", "9th century", "10th century", 
+                  "11th century", "12th century", "13th century", "14th century",
+                  "15th century", "16th century", "17th century","18th century",                       "19th century", "20th century", "21st century")
 names(century_data) <- century_list
 
 
@@ -506,29 +535,25 @@ for (i in 1:length(century_data)) {
     page_rank[[i]] <- page_rank[[i]] %>%
         sort(decreasing = TRUE) %>%
         head(1)
-    page_rank[[i]] <- paste(names(page_rank[[i]]), "\n", round(page_rank[[i]],
-        2))
+    page_rank[[i]] <- paste(names(page_rank[[i]]))
     
     eigen_centrality[[i]] <- eigen_centrality(century_data[[i]], weights = NA)$vector
     eigen_centrality[[i]] <- eigen_centrality[[i]] %>%
         sort(decreasing = TRUE) %>%
         head(1)
-    eigen_centrality[[i]] <- paste(names(eigen_centrality[[i]]), "\n",
-        round(eigen_centrality[[i]], 2))
+    eigen_centrality[[i]] <- paste(names(eigen_centrality[[i]]))
     
     between[[i]] <- betweenness(century_data[[i]], weights = NA)
     between[[i]] <- between[[i]] %>%
         sort(decreasing = TRUE) %>%
         head(1)
-    between[[i]] <- paste(names(between[[i]]), "\n", round(between[[i]],
-        2))
+    between[[i]] <- paste(names(between[[i]]))
     
     authority[[i]] <- authority_score(century_data[[i]], scale = TRUE)$vector
     authority[[i]] <- authority[[i]] %>%
         sort(decreasing = TRUE) %>%
         head(1)
-    authority[[i]] <- paste(names(authority[[i]]), "\n", round(authority[[i]],
-        2))
+    authority[[i]] <- paste(names(authority[[i]]))
 }
     
 
@@ -541,44 +566,45 @@ colnames(out) <- century_list
 
 out <- as.data.frame(out)
 
-first <- out[c("9th century", "10th century", "11th century", "12th century")] %>%
+first <- out[c("1st century", "4th century", "5th century", "6th century")] %>%
     gt(rownames_to_stub = TRUE) %>%
-    tab_header(title = "1. Centrality for centuries from 9th to 12th")
+    tab_header(title = "1. Centrality for centuries from 1st to 6th")
 
-second <- out[c("10th century", "11th century", "12th century", "13th century")] %>%
+second <- out[c("7th century", "8th century", "9th century", "10th century")] %>%
     gt(rownames_to_stub = TRUE) %>%
-    tab_header(title = "2. Centrality for centuries from 10th to 13th")
+    tab_header(title = "2. Centrality for centuries from 7th to 10th")
 
-third <- out[c("14th century", "15th century", "16th century", "17th century")] %>%
+third <- out[c("11th century", "12th century", "13th century", "14th century")] %>%
     gt(rownames_to_stub = TRUE) %>%
-    tab_header(title = "3. Centrality for centuries from 14th to 17th")
+    tab_header(title = "3. Centrality for centuries from 11th to 14th")
 
-fourth <- out[c("18th century", "19th century", "20th century")] %>%
+fourth <- out[c("15th century", "16th century", "17th century", "18th century")] %>%
     gt(rownames_to_stub = TRUE) %>%
-    tab_header(title = "4. Centrality for centuries from 18th to 20th")
+    tab_header(title = "4. Centrality for centuries from 15th to 18th")
+fiveth <- out[c("19th century", "20th century", "21st century")] %>%
+    gt(rownames_to_stub = TRUE) %>%
+    tab_header(title = "5. Centrality for centuries from 19th to 21st")
 
 first
 second
 third
 fourth
+fiveth
 ```
 
-3.2 Explain what data you have used to determine influence in each century.
+### 3.2 Explain what data you have used to determine influence in each century.
 
-Answer:
+#### Answer:
 
+\
 First, subgraphs were created for each century so that the people from
 other centuries couldn't influence the centrality scores for the 
 second century.
-
-Second, the connections (directed edges) are used to determin the influence
+\
+Second, the connections (directed edges) are used to determine the influence
 of people in each century.
 
-3.3 Say why the centrality measures you have used are appropriate. 
-Your table should look something like the one shown below. 
-You are expected to create it computationally using a dataframe or 
-tibble to hold the data and a table library such as kableExtra to 
-render the table.
+### 3.3 Say why the centrality measures you have used are appropriate. Your table should look something like the one shown below. You are expected to create it computationally using a dataframe or tibble to hold the data and a table library such as kableExtra to  render the table.
 
 Answer :
 

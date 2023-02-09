@@ -11,9 +11,91 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r}
+library(ggplot2)
+library(dplyr)
+library(gghighlight)
 
 df <- read.csv("Counsumer_Price_Index.csv")
 
+df <- df %>%
+  rename(Location = ï..Location)
 
-View(df["year" %in% 2021])
+sav <- df %>%
+  filter(Location %in% c("IRL", "CAN", "AUS",
+                            "USA", "FRA", "DEU",
+                            "ESP", "ITA", "NLD", "OECD")) %>%
+  filter(Time == "2022-12") %>%
+  mutate(Location = recode(Location, 
+                           "IRL" = "IRELAND",
+                           "AUS" = "AUSTRALIA",
+                           "USA" = "UNITED STATES",
+                           "DEU" = "GERMANY",
+                           "CAN" = "CANADA",
+                           "ESP" = "SPAIN",
+                           "ITA" = "ITALY",
+                           "FRA" = "FRANCE",
+                           "NLD" = "NETHERLANDS")) %>%
+  filter(Subject != "Energy")
+
+
+order <- sav %>% 
+  group_by(Location) %>% 
+  summarise(sum = sum(Percentage)) %>% 
+  arrange(desc(sum)) %>% 
+  select(Location) %>%
+  unlist() %>%
+  unname()
+
+sav %>% 
+  ggplot(aes(x = factor(Location,  levels = order), y = Percentage, colour = factor(Subject))) +
+  geom_point(size = 2.5, position = position_dodge(0.5)) + 
+  geom_linerange(aes(ymin = 0, ymax = Percentage),
+               linetype = "dotted", position = position_dodge(0.5)) + 
+  scale_fill_manual(values = c("#1b9e77", "#d95f02", "green"),
+                    name = NULL,
+                    labels = c("Food", "Total", "Total Minus")) +
+  coord_flip() +
+  xlab("Countries --> ") +
+  ylab("Increase in CPI by % -->") +
+  scale_color_manual(values = c("Food" = "#009E73", "Total" = "#CC79A7",
+                                "Total_Minus_Food_Energy" = "#F0E442")) +
+  labs(colour = "CPI value for")+
+  facet_grid(~Subject, labeller = as_labeller(c("Food" = "Food",
+                                                "Total" = "Total",
+                                                "Total_Minus_Food_Energy" = 
+                                                "Items Other than Food and Energy")))+
+  theme_bw() +
+  theme(legend.position="bottom")
+
+
+sav %>% 
+  ggplot(aes(x = Subject, y = Percentage, color = Subject)) +
+  geom_point(data = sav[which(sav$Location =="IRELAND"), ], aes(shape = Location), size = 5) + 
+  geom_text(label = "IRELAND")+
+  geom_point(data = sav[which(sav$Location == "OECD"), ], aes(shape = Location), size = 5) +
+  geom_point(data = sav[which(!sav$Location %in% c("OECD","IRELAND")), ], size = 2.5, position = "jitter") +
+  coord_flip()
+```
+
+```{r}
+sav %>%
+  ggplot(aes(x = factor(Location, order), y = Percentage, 
+                        fill = ifelse(Location == "IRELAND","red", "blue"))) +
+  geom_col(size=0.2, position="dodge")+
+  xlab("Countries --> ") +
+  ylab("Increase in CPI by % -->")+
+  facet_grid(~Subject)+
+  theme_classic()+
+  coord_flip()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
+        legend.position = "top")
+
+
+sav %>%
+  ggplot(aes(x = factor(Location, levels = c("IRL", "AUS", "USA", "DEU", "CAN", "ESP", "ITA", "FRA")), y = Percentage, fill = Subject)) +
+  geom_col(size=0.2, position="dodge")+
+  xlab("Countries --> ") +
+  ylab("Increase in CPI by % -->")+
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```

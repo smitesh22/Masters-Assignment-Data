@@ -47,15 +47,39 @@ order <- sav %>%
 ```
 
 ```{r}
+
+colorblind_colors <- colorBlindness::availableColors()
 sav %>%
-  ggplot(aes(x = factor(Location, order), y = Percentage, 
-                        fill = ifelse(Location == "IRELAND","red", "blue"))) +
-  geom_col(linewidth=0.2, position="dodge")+
+  
+  ggplot(aes(x = factor(Location, order), y = Percentage)) +
+  geom_col(data = filter(sav, Location == "IRELAND"), fill = colorblind_colors[2] ,linewidth=0.2, position="dodge")+
+  geom_col(data = filter(sav, Location == "OECD"), fill = colorblind_colors[3] ,linewidth=0.2, position="dodge")+
+  xlab("Countries --> ") +
+  geom_col(data = filter(sav, !Location %in% c("OECD", "IRELAND")), fill = colorblind_colors[4] ,linewidth=0.2, position="dodge")+
   xlab("Countries --> ") +
   ylab("Increase in CPI by % -->")+
-  facet_grid(~Subject)+
-  theme_classic()+
+  facet_grid(~Subject, labeller = as_labeller(c("Food" = "Food",
+                                                "Total" = "Total",
+                                                "Total_Minus_Food_Energy" = "Excluding Food & Expenses")))+
   coord_flip()+
+  labs(fill = "Country / Organization")+
+  scale_fill_discrete(name = "Country / Organization", labels = c("OECD", "Other countries in OECD", "IRELAND")) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
-        legend.position = "top")
+        legend.position = "top")+
+  theme_light()
+```
+
+
+```{r}
+
+sav %>% 
+  ggplot(aes(x = Subject, y = Percentage, color = Subject, shape = Location)) +
+  geom_point(data = filter(sav, Location == "IRELAND"), shape = "square",  size = 3) + 
+  geom_point(data = filter(sav, Location == "OECD"), shape = "diamond",  size = 3) +
+  geom_point(data = filter(sav, !Location %in% c("OECD", "IRELAND")), shape = "circle", size = 2, position = "jitter") +
+  scale_shape_manual()+
+  coord_flip() +
+  theme(legend.position = "top")+
+  theme_light()
+
 ```

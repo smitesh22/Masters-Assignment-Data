@@ -1,12 +1,15 @@
 ---
-title: "Main"
+title: "Main_Out"
 author: "Smitesh Patil"
-date: "2023-02-09"
-output: pdf_document
+date: "2023-02-13"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+options(warn=-1)
 ```
 
 ```{r}
@@ -46,40 +49,94 @@ order <- sav %>%
   unname()
 ```
 
-```{r}
+```{r, fig.height = 7, fig.width = 14}
 
 colorblind_colors <- colorBlindness::availableColors()
 sav %>%
   
   ggplot(aes(x = factor(Location, order), y = Percentage)) +
-  geom_col(data = filter(sav, Location == "IRELAND"), fill = colorblind_colors[2] ,linewidth=0.2, position="dodge")+
-  geom_col(data = filter(sav, Location == "OECD"), fill = colorblind_colors[3] ,linewidth=0.2, position="dodge")+
+  geom_col(data = filter(sav, Location == "IRELAND"), fill = colorblind_colors[2],
+           linewidth=0.2, position="dodge")+
+  geom_col(data = filter(sav, Location == "OECD"), fill = colorblind_colors[3], 
+           linewidth=0.2, position="dodge")+
   xlab("Countries --> ") +
-  geom_col(data = filter(sav, !Location %in% c("OECD", "IRELAND")), fill = colorblind_colors[4] ,linewidth=0.2, position="dodge")+
+  geom_col(data = filter(sav, !Location %in% c("OECD", "IRELAND")), 
+           fill = colorblind_colors[4] ,linewidth=0.2, position="dodge")+
   xlab("Countries --> ") +
   ylab("Increase in CPI by % -->")+
-  facet_grid(~Subject, labeller = as_labeller(c("Food" = "Food",
-                                                "Total" = "Total",
-                                                "Total_Minus_Food_Energy" = "Excluding Food & Expenses")))+
+  facet_grid(~Subject, 
+             labeller = as_labeller(c("Food" = "Food",
+                                      "Total" = "Total",
+                                      "Total_Minus_Food_Energy" = "Excluding Food & Expenses")))+
   coord_flip()+
   labs(fill = "Country / Organization")+
-  scale_fill_discrete(name = "Country / Organization", labels = c("OECD", "Other countries in OECD", "IRELAND")) + 
+  scale_y_continuous(breaks = round(seq(0, 20, by = 1),1))+
+  scale_fill_discrete(name = "Country / Organization", 
+                      labels = c("OECD", "Other countries in OECD", "IRELAND")) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
-        legend.position = "top")+
+        legend.position = "top",)+
+  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared to OECD and other countries in OECD")+
   theme_light()
 ```
 
 
-```{r}
-
+```{r, fig.height = 7, fig.width = 14}
 sav %>% 
-  ggplot(aes(x = Subject, y = Percentage, color = Subject, shape = Location)) +
-  geom_point(data = filter(sav, Location == "IRELAND"), shape = "square",  size = 3) + 
-  geom_point(data = filter(sav, Location == "OECD"), shape = "diamond",  size = 3) +
-  geom_point(data = filter(sav, !Location %in% c("OECD", "IRELAND")), shape = "circle", size = 2, position = "jitter") +
-  scale_shape_manual()+
-  coord_flip() +
-  theme(legend.position = "top")+
+  ggplot(aes(x = Subject, y = Percentage, color = Subject)) + 
+  geom_point(data = filter(sav, Location == "IRELAND"), aes(shape = Location), size = 5) + 
+  geom_text(data = filter(sav, Location == "IRELAND"), 
+            label = "IRELAND", vjust = -2, nudge_x = -0.05, size = 3)+
+  geom_point(data = filter(sav, Location == "OECD"), aes(shape = Location), size = 6) +
+  geom_text(data = filter(sav, Location == "OECD"), label = "OECD", hjust = 0, nudge_x = 0.05)+
+  geom_point(data = filter(sav, !Location %in% c("OECD", "IRELAND")), shape = "circle", 
+             size = 2, position = "jitter") +
+  scale_y_continuous(breaks = round(seq(0, 20, by = 0.5),1))+
+  coord_flip() + 
+  xlab("Countries --> ") +
+  ylab("Increase in CPI by % -->") +
+  scale_color_manual(values=c(unname(colorblind_colors[2]), 
+                              unname(colorblind_colors[3]), 
+                              unname(colorblind_colors[4])), 
+                     guide = guide_legend(override.aes = list(label = ""))) + 
+  scale_shape_manual(values = c("square", "diamond")) +
+  scale_x_discrete(labels = c("Food", "Total", "Other countries in OECD")) +
+  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared to OECD and other countries in OECD")+
+  theme(legend.position = "top", axis.text.x = element_text(angle = -45, vjust = 0.5, hjust=1)) +
   theme_light()
+```
+```{r fig.height = 7, fig.width = 14}
+
+order <- sav %>%
+  filter(Subject == "Food") %>%
+  arrange(desc(Percentage)) %>%
+  select(Location) %>% 
+  unlist() %>%
+  unname()
+
+order <- replace(order, c(1, 8), order[c(8, 1)])
+
+sav %>%
+  ggplot(aes(x = factor(Location, order), y = Percentage, color = Subject))+
+  geom_point(data = filter(sav, Location != "IRELAND"),
+             size = 4, position = position_dodge(0.5))+
+  geom_point(data = filter(sav, Location == "IRELAND"),
+             size = 6, position = position_dodge(1))+
+  geom_linerange(data = filter(sav, Location == "IRELAND"),
+                 aes(ymin = 0, ymax = Percentage), 
+                 position = position_dodge(1),
+                linetype = "dashed") + 
+  geom_linerange(data = filter(sav, Location != "IRELAND"),
+                aes(ymin = 0, ymax = Percentage),
+                 position = position_dodge(0.5), linetype = "dashed") + 
+  scale_color_manual(values=c(unname(colorblind_colors[2]), 
+                              unname(colorblind_colors[3]), 
+                              unname(colorblind_colors[4])))+
+  coord_flip()+
+  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared to OECD and other countries in OECD")+
+  scale_y_continuous(breaks = round(seq(0, 20, by = 1),1))+
+  theme(panel.grid.major.x = element_line(linewidth =.01, color="black"),
+        panel.grid.major.y = element_blank(),
+        legend.position = "top"
+    )
 
 ```

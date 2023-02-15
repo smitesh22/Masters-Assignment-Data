@@ -1,5 +1,5 @@
 ---
-title: "Main_Out"
+title: "Assingment-1 Part 2"
 author: "Smitesh Patil"
 date: "2023-02-13"
 output:
@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 options(warn=-1)
 ```
 
+
 ```{r}
 library(ggplot2)
 library(dplyr)
@@ -19,17 +20,22 @@ library(gghighlight)
 library(forcats)
 df <- read.csv("Counsumer_Price_Index.csv")
 
+#renaming the column Location
 df <- df %>%
   rename(Location = ï..Location)
 
+
 sav <- df %>%
-  filter(Location %in% c("IRL", "CAN", "AUS",
+  #selecting 8 countries and 1 group of nations 
+  filter(Location %in% c("IRL", "CAN", "JPN",
                             "USA", "FRA", "DEU",
                             "ESP", "ITA", "NLD", "OECD")) %>%
+  # filtering data by time
   filter(Time == "2022-12") %>%
+  #changing country codes to names for readability
   mutate(Location = recode(Location, 
                            "IRL" = "IRELAND",
-                           "AUS" = "AUSTRALIA",
+                           "JPN" = "JAPAN",
                            "USA" = "UNITED STATES",
                            "DEU" = "GERMANY",
                            "CAN" = "CANADA",
@@ -37,9 +43,10 @@ sav <- df %>%
                            "ITA" = "ITALY",
                            "FRA" = "FRANCE",
                            "NLD" = "NETHERLANDS")) %>%
+  #removing unwanted data
   filter(Subject != "Energy")
 
-
+# creating a order for levels attributes used to other the plot
 order <- sav %>% 
       filter(Subject == "Food") %>%
       arrange(Percentage) %>%
@@ -49,72 +56,119 @@ order <- sav %>%
 
 order <- replace(order, c(1,2), order[c(2,1)])
 ```
+1. Implement the dot plot approach using the ggplot2 library
 
 ```{r, fig.height = 7, fig.width = 14}
 
+# codes for colorblind colors
 colorblind_colors <- colorBlindness::availableColors()
+
+order <- c( "IRELAND", "JAPAN", "CANADA" ,"UNITED STATES", "FRANCE", "ITALY",
+"OECD", "SPAIN", "NETHERLANDS", "GERMANY")
+
 sav %>%
-  ggplot(aes(x = factor(Location, levels = order), y = Percentage)) +
-  geom_col(data = filter(sav, Location == "IRELAND"), fill = colorblind_colors[2],
-           linewidth=0.2, position="dodge")+
-  geom_col(data = filter(sav, Location == "OECD"), fill = colorblind_colors[3], 
-           linewidth=0.2, position="dodge")+
-  xlab("Countries --> ") +
-  geom_col(data = filter(sav, !Location %in% c("OECD", "IRELAND")), 
-           fill = colorblind_colors[4] ,linewidth=0.2, position="dodge")+
+  # adding order to the plot
+  mutate(Location = factor(Location, levels = order)) %>%
+  # ggplot intialize aesthesis for x,y axis and coloring
+  ggplot(aes(x = Location, y = Percentage, color = Subject)) +
+  #for countries other than Ireland dot plot with size 4
+  geom_point(data = ~ mutate(., Percentage = if_else(Location == "Ireland",
+             Percentage[NA], Percentage)),
+             size = 4, position = position_dodge(0.5), na.rm = TRUE) +
+  #for Ireland dot plot with size 6
+  geom_point(data = ~ filter(., Location == "IRELAND"),
+             size = 6, position = position_dodge(0.5)) +
+  #for the dotted line from y-axis
+  geom_linerange(data = ~ filter(., Location == "IRELAND"),
+  aes(ymin = 0, ymax = Percentage), position = position_dodge(0.5),linetype = "dotdash") +
+  geom_linerange(data = ~ filter(., Location != "IRELAND"),
+                aes(ymin = 0, ymax = Percentage),
+                position = position_dodge(0.5), linetype = "dotdash") +
+  #flipping axes
+  coord_flip()+
+  #labels for data
+  labs(caption = "Data Source : CPI data for countries")+
   xlab("Countries --> ") +
   ylab("Increase in CPI by % -->")+
+  # y axis scale with 1 unit of gap
+  scale_y_continuous(breaks = round(seq(0, 20, by = 1),1))+
+  # adding defined colors
+  scale_color_manual(name = "Type of Items",
+  labels = c("Food", "Total", "Excluding food and energy"),
+  values=c(unname(colorblind_colors[2]),
+           unname(colorblind_colors[3]),
+           unname(colorblind_colors[4])))+
+  #title for the graph
+  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared
+                  to OECD and other countries in OECD")+
+  # accentuate the gridline
+  theme(panel.grid.major.x = element_line(linewidth =.01, color="black"),
+  panel.grid.major.y = element_blank(),
+  legend.position = "top"
+)
+```
+2. Implement the bar plot using the ggplot2 library
+
+```{r fig.height = 7, fig.width = 14}
+sav %>%
+  # ggplot initialize aesthetics for x,y axis 
+  ggplot(aes(x = factor(Location, levels = order), y = Percentage)) +
+  # columns/bars for Ireland
+  geom_col(data = filter(sav, Location == "IRELAND"), fill = colorblind_colors[2],
+           linewidth=0.2, position="dodge")+
+  # columns/bars for OECD
+  geom_col(data = filter(sav, Location == "OECD"), fill = colorblind_colors[3], 
+           linewidth=0.2, position="dodge")+
+  # columns/bars for other countries
+  geom_col(data = filter(sav, !Location %in% c("OECD", "IRELAND")), 
+           fill = colorblind_colors[4] ,linewidth=0.2, position="dodge")+
+  # labels for axis
+  xlab("Countries --> ") +
+  ylab("Increase in CPI by % -->")+
+  #faceting the plot
   facet_grid(~Subject, 
              labeller = as_labeller(c("Food" = "Food",
                                       "Total" = "Total",
                                       "Total_Minus_Food_Energy" = "Excluding Food & Expenses")))+
+  #flipping labels
   coord_flip()+
-  labs(fill = "Country / Organization")+
+  labs(fill = "Country / Organization", caption = "Data Source : CPI data for countries")+
+  # y axis scale with 1 unit of gap
   scale_y_continuous(breaks = round(seq(0, 20, by = 1),1))+
   scale_fill_discrete(name = "Country / Organization", 
                       labels = c("OECD", "Other countries in OECD", "IRELAND")) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), 
         legend.position = "top",)+
-  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared to OECD and other countries in OECD")+
+  # title for the graph
+  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared 
+                   to OECD and other countries in OECD")+
   theme_light()
 ```
 
-```{r fig.height = 7, fig.width = 14}
-order <- sav %>% 
-      filter(Subject == "Food") %>%
-      arrange(Percentage) %>%
-      select(Location) %>%
-      unlist() %>%
-      unname()
 
-order <- replace(order, c(1,2), order[c(2,1)])
+3. Comment upon changes you have made since part 1
 
-sav %>%
-  mutate(Location = factor(Location, levels = order)) %>%
-  ggplot(aes(x = Location, y = Percentage, color = Subject)) +
-  geom_point(data = ~ mutate(., Percentage = if_else(Location == "Ireland", Percentage[NA], Percentage)),
-             size = 4, position = position_dodge(0.5), na.rm = TRUE) +
-  geom_point(data = ~ filter(., Location == "IRELAND"),
-             size = 6, position = position_dodge(1)) +
-  geom_linerange(data = ~ filter(., Location == "IRELAND"),
-                 aes(ymin = 0, ymax = Percentage), 
-                 position = position_dodge(0.5),
-                 linetype = "dotdash") + 
-  geom_linerange(data = ~ filter(., Location != "IRELAND"),
-                 aes(ymin = 0, ymax = Percentage),
-                 position = position_dodge(0.5), linetype = "dotdash") + 
-  coord_flip()+
-  ggtitle(label = "Increase in inflation (by CPI) in Ireland compared to OECD and other countries in OECD")+
-  xlab("Countries --> ") +
-  ylab("Increase in CPI by % -->")+
-  scale_y_continuous(breaks = round(seq(0, 20, by = 1),1))+
-  scale_color_manual(name = "Type of Items", 
-                     labels = c("Food", "Total", "Excluding food and energy"),
-                     values=c(unname(colorblind_colors[2]), 
-                              unname(colorblind_colors[3]), 
-                              unname(colorblind_colors[4])))+
-  theme(panel.grid.major.x = element_line(linewidth =.01, color="black"),
-        panel.grid.major.y = element_blank(),
-        legend.position = "top"
-        )
-```
+Answer:-
+
+Since the review lecture on assigment 1, I concluded that my approach with dot-plot 
+was not correct for two reasons.
+
+First, the dots in the dot plot were not able to differentiate between the countries
+other than Ireland and the group of nations (OECD).
+
+Second, information was had to interpret as each individual subject category(Food, Total,
+Excluding food and energy) looked like cluster.
+
+In conclusion, the dot-plot was hard to interpret and it was difficult for the eyes 
+to find patterns.Hence, I have went with a lollipop plot for the final draft. Here, 
+I have sorted the data based on the food cpi value. Then I have kept Ireland separately 
+from others at the bottom. I have also added emphasis on Ireland by making the dot bigger 
+in size for Ireland.Futhermore, I have added a dotted line that would aid the viewer in 
+measuring the value of percentages.
+
+I have sticked with the format of bar-plot that I decided on Part 1. I think coloring
+Ireland and the group of nations (as group of nations is a separate entity compared 
+to other nations in the plot) different make them visually stand out from other
+nations. Faceting the category of commodity for CPI values allows for interpretation 
+of inflation for diffrent categories at a time. Keeping the countries/ group of nations
+on y-axis allows for better comparison amongst them.

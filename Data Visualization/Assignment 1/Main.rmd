@@ -107,7 +107,7 @@ sav %>%
   legend.position = "top"
 )
 ```
-2. Implement the bar plot using the ggplot2 library
+2. Implement the bar plot using the ggplot2 library[1]
 
 ```{r fig.height = 7, fig.width = 14}
 sav %>%
@@ -172,3 +172,9 @@ to other nations in the plot) different make them visually stand out from other
 nations. Faceting the category of commodity for CPI values allows for interpretation 
 of inflation for diffrent categories at a time. Keeping the countries/ group of nations
 on y-axis allows for better comparison amongst them.
+
+
+[1]Note: for the dot-plot, I was having last minute issues trying to order the food CPI values. 
+Hence,I tried for help on stack overflow, Here is the link of the question I asked:
+https://stackoverflow.com/questions/75440844/ordering-of-ggplot-not-working-with-factors.
+I thought, I'd let you know beforehand.

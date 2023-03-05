@@ -1,0 +1,108 @@
+---
+author: "Smitesh Patil"
+date: "2023-03-03"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+# This code provides and example of how to 
+# read the .shp file provided for this assignment.
+# It also provides an example of the normalisation of 
+# the daily and cumulative case figures per 100,000 of population of each county
+# for one date.
+
+library(sf)
+library(dplyr)
+
+# sr_read will read the data in the shp file into a dataframe
+# However, it also requires the other files in the zip file you downloaded.
+# If you are getting a read error, make sure that the other files
+# .dbf, .prj and .shx are in the same folder as the .shp file you are 
+#  attempting to read
+
+IRL_counties_Covid19 <- st_read("C:\\Users\\Smitesh\\Documents\\Football Data Analysis\\Data\\Data Visualization\\Assignment 2\\CovidCountyStatisticsIreland_v2.shp", quiet = TRUE)
+
+# This is an example of calculating the number cumulative and daily cases per county 
+# normalized by 100,000 of population as at 01 September 2021. 
+
+# lubridate is useful library for manipulating and comparing date values
+library(lubridate)
+
+IRL_Covid19_2021_09_01<- IRL_counties_Covid19%>%
+  filter(TimeStamp == ymd("2021-12-01"))%>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))
+
+```
+
+```{r}
+library(ggplot2)
+library(colorspace)
+library(colorblindr)
+
+ggplot(IRL_Covid19_2021_09_01) +
+  geom_sf(aes(fill = -ConfirmedC_per_100k)) 
+  
+```
+
+```{r}
+
+mean_daily_cases <- IRL_Covid19_2021_09_01 %>%
+  select(DailyCCase_per_100k) %>%
+  st_drop_geometry() %>% 
+  unlist() %>% 
+  mean()
+
+IRL_Covid19_2021_09_01<- IRL_Covid19_2021_09_01 %>% 
+  mutate(Mean_divergence_dailycases_per100k = DailyCCase_per_100k - mean_daily_cases)
+
+ggplot(IRL_Covid19_2021_09_01) +
+  geom_sf(aes(fill = -Mean_divergence_dailycases_per100k)) 
+```
+
+```{r}
+library(colorspace)
+
+IRL_Covid19_plot3<- IRL_counties_Covid19%>%
+  filter(CountyName == "Galway") %>%
+  filter(TimeStamp %in% seq(ymd("2021-08-01") , ymd("2021-12-01"), by="weeks"))
+
+
+ggplot(IRL_Covid19_plot3, aes(x= TimeStamp, y= DailyCCase)) +
+  geom_line()+
+  geom_point()
+  
+```
+```{r}
+
+mean <- IRL_counties_Covid19 %>%
+  st_drop_geometry() %>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))%>%
+  select(CountyName, DailyCCase_per_100k) %>%
+  group_by(CountyName) %>%
+  summarise(mean = mean(DailyCCase_per_100k, na.rm = TRUE)) %>%
+  arrange(desc(mean))
+
+plt_data<- IRL_counties_Covid19%>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))%>%
+  filter(CountyName %in% c("Galway", head(mean$CountyName, 1), tail(mean$CountyName, 1)))
+
+plt_data2<- IRL_counties_Covid19%>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))%>%
+  filter(!CountyName %in% c("Galway", head(mean$CountyName, 1), tail(mean$CountyName, 1)))
+  
+
+
+ggplot(plt_data, aes(y=DailyCCase_per_100k, x = TimeStamp, ))+
+  geom_smooth(data = plt_data2,aes(group = CountyName, colour = "#d3d3d3" ), size = 1, alpha = 0.9, na.rm = TRUE, method = "loess", se = FALSE)+
+  geom_smooth(data = plt_data, aes(group = CountyName, color = CountyName), size = 0.9, alpha = 0.8, na.rm = TRUE, method = "loess", se = FALSE)+
+  scale_color_manual(values = c("#d3d3d3", "#663399", "#339999", "#000066"), labels = c("Others", "Galway", "Monaghan", "Wicklow"))
+  
+```
+

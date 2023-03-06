@@ -19,6 +19,7 @@ library(colorblindr)
 IRL_counties_Covid19 <- st_read("C:\\Users\\Smitesh\\Documents\\Football Data Analysis\\Data\\Data Visualization\\Assignment 2\\CovidCountyStatisticsIreland_v2.shp", quiet = TRUE)
 #ignore warnings
 options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 
 ```
 
@@ -115,7 +116,7 @@ IRL_Covid19_plot2 %>%
   ggplot(aes(x = TimeStamp, y=ConfirmedC_per_100k, color = color))+
   # for other counties a faded grey shade
   geom_smooth(data = other_counties,aes(group = CountyName, colour = "#d3d3d3" ), 
-              size = 0.1, alpha = 0.9, na.rm = TRUE, method = "loess", se = FALSE)+
+              size = 1, alpha = 0.9, na.rm = TRUE, method = "loess", se = FALSE)+
   # individual colors for galway and highest, lowest counties 
   geom_smooth(data = select_county_data, aes(group = CountyName, color = CountyName), 
               size = 1, alpha = 0.8, na.rm = TRUE, method = "loess", se = FALSE)+
@@ -133,6 +134,7 @@ IRL_Covid19_plot2 %>%
   ggtitle("Cumulative Covid cases in Galway compared to Other counties")+
   #labels
   labs(caption = "Source: Covid Data Ireland")+
+  theme_minimal()+
   theme(axis.text.x = element_text(angle = 50, vjust = 0.5, hjust=1),
         axis.title.x = element_text(vjust = -2.5),
         legend.position = "top",

@@ -9,27 +9,47 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 library(sf)
 library(dplyr)
-
-
+library(ggplot2)
+library(lubridate)
+library(colorblindr)
 IRL_counties_Covid19 <- st_read("C:\\Users\\Smitesh\\Documents\\Football Data Analysis\\Data\\Data Visualization\\Assignment 2\\CovidCountyStatisticsIreland_v2.shp", quiet = TRUE)
 
-library(lubridate)
 ```
 
 ```{r}
-IRL_Covid19_2021_09_01<- IRL_counties_Covid19%>%
+palette <- colorblindr::palette_OkabeIto
+
+IRL_Covid19_2021_12_21<- IRL_counties_Covid19%>%
   filter(TimeStamp == ymd("2021-12-21"))%>%
   mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
   mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))
 
-mean_daily_cases <- IRL_Covid19_2021_09_01 %>%
+mean_daily_cases <- IRL_Covid19_2021_12_21 %>%
   select(ConfirmedC_per_100k) %>%
   st_drop_geometry() %>% 
   unlist() %>% 
   mean()
-plt_order <- order(IRL_Covid19_2021_09_01$ConfirmedC_per_100k, decreasing = TRUE)
-IRL_Covid19_2021_09_01$mean_divergence = factor(IRL_Covid19_2021_09_01$ConfirmedC_per_100k, 
-                                      levels =IRL_Covid19_2021_09_01$ConfirmedC_per_100k[plt_order])
+
+IRL_Covid19_2021_12_21 %>% 
+  mutate(color = ifelse(CountyName == "Galway", "1", 
+                        ifelse(ConfirmedC_per_100k < mean_daily_cases, "2", "3"))) %>%
+  ggplot(aes(x = ConfirmedC_per_100k, y = reorder(CountyName,ConfirmedC_per_100k)))+
+  geom_point(size = 2, aes(color = color))+
+  geom_vline(aes(xintercept = mean_daily_cases))+
+  geom_linerange(aes(xmin = mean_daily_cases, xmax = ConfirmedC_per_100k, color = color),
+                 linetype = "dashed")+
+  scale_color_manual(values = c(palette[2], palette[1], palette[5]),
+                    labels = c("Galway", "Counties performing better than average",
+                               "Counties performing worse than average"))+
+  scale_x_continuous(limits = c(10000, 19000),
+                     breaks = seq(10000, 19000, by = 1000),
+                     name = "Confirmed Cases (Per 100,000 people) -->")+
+  scale_y_discrete(name = "Counties -->")+
+  annotate(x=mean_daily_cases+900, y=1, label="<- mean line", color="black", geom = "text",
+           lineheight = .6)+
+  theme_minimal()+
+  theme(legend.position = "top",
+        legend.title = element_blank())
 ```
 
 

@@ -32,7 +32,7 @@ IRL_counties_Covid19 <- st_read("C:\\Users\\Smitesh\\Documents\\Football Data An
 library(lubridate)
 
 IRL_Covid19_2021_09_01<- IRL_counties_Covid19%>%
-  filter(TimeStamp == ymd("2021-12-01"))%>%
+  filter(TimeStamp == ymd("2021-12-21"))%>%
   mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
   mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))
 
@@ -43,28 +43,29 @@ library(ggplot2)
 library(colorspace)
 library(colorblindr)
 
-ggplot(IRL_Covid19_2021_09_01) +
-  geom_sf(aes(fill = -ConfirmedC_per_100k)) 
-  
+ggplot(IRL_Covid19_2021_09_01, aes(x = ConfirmedC_per_100k, y = reorder(CountyName, ConfirmedC_per_100k)))+
+  geom_bar(stat = "identity")
 ```
 
 ```{r}
-
 mean_daily_cases <- IRL_Covid19_2021_09_01 %>%
-  select(DailyCCase_per_100k) %>%
+  select(ConfirmedC_per_100k) %>%
   st_drop_geometry() %>% 
   unlist() %>% 
   mean()
 
-IRL_Covid19_2021_09_01<- IRL_Covid19_2021_09_01 %>% 
-  mutate(Mean_divergence_dailycases_per100k = DailyCCase_per_100k - mean_daily_cases)
+IRL_Covid19_2021_09_01<- IRL_Covid19_2021_09_01 %>%
+  mutate(mean_divergence =   - mean_daily_cases) 
 
-ggplot(IRL_Covid19_2021_09_01) +
-  geom_sf(aes(fill = -Mean_divergence_dailycases_per100k)) 
+plt_order <- order(IRL_Covid19_2021_09_01$ConfirmedC_per_100k, decreasing = TRUE)
+IRL_Covid19_2021_09_01$mean_divergence = factor(IRL_Covid19_2021_09_01$ConfirmedC_per_100k, 
+                                                levels = IRL_Covid19_2021_09_01$ConfirmedC_per_100k[plt_order])
+
 ```
 
 ```{r}
 library(colorspace)
+library(ggridges)
 
 IRL_Covid19_plot3<- IRL_counties_Covid19%>%
   filter(CountyName == "Galway") %>%
@@ -72,10 +73,13 @@ IRL_Covid19_plot3<- IRL_counties_Covid19%>%
 
 
 ggplot(IRL_Covid19_plot3, aes(x= TimeStamp, y= DailyCCase)) +
-  geom_line()+
-  geom_point()
+  geom_point()+
+  geom_smooth(se= FALSE, color = "blue")
+
   
 ```
+
+
 ```{r}
 
 mean <- IRL_counties_Covid19 %>%
@@ -99,10 +103,31 @@ plt_data2<- IRL_counties_Covid19%>%
   
 
 
-ggplot(plt_data, aes(y=DailyCCase_per_100k, x = TimeStamp, ))+
-  geom_smooth(data = plt_data2,aes(group = CountyName, colour = "#d3d3d3" ), size = 1, alpha = 0.9, na.rm = TRUE, method = "loess", se = FALSE)+
-  geom_smooth(data = plt_data, aes(group = CountyName, color = CountyName), size = 0.9, alpha = 0.8, na.rm = TRUE, method = "loess", se = FALSE)+
+ggplot(plt_data, aes(y=ConfirmedC_per_100k, x = TimeStamp, ))+
+  geom_smooth(data = plt_data2,aes(group = CountyName, colour = "#d3d3d3" ), size = 0.1, alpha = 0.9, na.rm = TRUE, method = "loess", se = FALSE)+
+  geom_smooth(data = plt_data, aes(group = CountyName, color = CountyName), size = 1.5, alpha = 0.8, na.rm = TRUE, method = "loess", se = FALSE)+
   scale_color_manual(values = c("#d3d3d3", "#663399", "#339999", "#000066"), labels = c("Others", "Galway", "Monaghan", "Wicklow"))
   
 ```
+Part 5
+```{r}
+part_5 <- IRL_counties_Covid19%>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))
 
+part_5 <- part_5[part_5$TimeStamp >= ymd("2021-01-01") & part_5$TimeStamp <= ymd("2021-02-01"), ]
+
+part_5 <- part_5 %>% group_by(CountyName) %>%
+  summarise(Cumulative_DailyCCases_per_100k_4Weeks = sum(DailyCCase_per_100k))
+
+part_5 <- part_5 %>% 
+  select(CountyName , Cumulative_DailyCCases_per_100k_4Weeks) %>%
+  mutate(mean_4weeks = mean(Cumulative_DailyCCases_per_100k_4Weeks))
+
+part_5<- part_5 %>%
+  mutate(mean_divergence =  Cumulative_DailyCCases_per_100k_4Weeks - mean_4weeks)
+
+ggplot(part_5) +
+  geom_sf(aes(fill = -mean_divergence)) 
+
+```

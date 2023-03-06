@@ -1,0 +1,35 @@
+---
+title: "Assingment 2 Main"
+author: "Smitesh Patil"
+date: "2023-03-06"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sf)
+library(dplyr)
+
+
+IRL_counties_Covid19 <- st_read("C:\\Users\\Smitesh\\Documents\\Football Data Analysis\\Data\\Data Visualization\\Assignment 2\\CovidCountyStatisticsIreland_v2.shp", quiet = TRUE)
+
+library(lubridate)
+```
+
+```{r}
+IRL_Covid19_2021_09_01<- IRL_counties_Covid19%>%
+  filter(TimeStamp == ymd("2021-12-21"))%>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))
+
+mean_daily_cases <- IRL_Covid19_2021_09_01 %>%
+  select(ConfirmedC_per_100k) %>%
+  st_drop_geometry() %>% 
+  unlist() %>% 
+  mean()
+plt_order <- order(IRL_Covid19_2021_09_01$ConfirmedC_per_100k, decreasing = TRUE)
+IRL_Covid19_2021_09_01$mean_divergence = factor(IRL_Covid19_2021_09_01$ConfirmedC_per_100k, 
+                                      levels =IRL_Covid19_2021_09_01$ConfirmedC_per_100k[plt_order])
+```
+
+

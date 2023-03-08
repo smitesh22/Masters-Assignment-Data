@@ -86,28 +86,18 @@ IRL_Covid19_plot2 <- IRL_counties_Covid19%>%
   
 # getting a list of means by counties and taking the first and last form highest 
 #and lowest values of cumulative data
-mean <- IRL_counties_Covid19 %>%
-  #dropping geometry for summarising 
+mean <- IRL_Covid19_plot2 %>%
   st_drop_geometry() %>%
-  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
-  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))%>%
-  select(CountyName, DailyCCase_per_100k) %>%
-  group_by(CountyName) %>%
-  #getting mean by grouping on county name
-  summarise(mean = mean(DailyCCase_per_100k, na.rm = TRUE)) %>%
-  #arrange desc of mean 
-  arrange(desc(mean))
+  filter(TimeStamp == "2021-12-21") %>%
+  arrange(ConfirmedC_per_100k) %>%
+  select(CountyName, ConfirmedC_per_100k)
 
 # get the data of galway and county with lowest and highest cumulative scores
-select_county_data<- IRL_counties_Covid19%>%
-  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
-  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))%>%
+select_county_data<- IRL_Covid19_plot2%>%
   filter(CountyName %in% c("Galway", head(mean$CountyName, 1), tail(mean$CountyName, 1)))
 
 # for rest of the counties
-other_counties<- IRL_counties_Covid19%>%
-  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
-  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))%>%
+other_counties<- IRL_Covid19_plot2%>%
   filter(!CountyName %in% c("Galway", head(mean$CountyName, 1), tail(mean$CountyName, 1)))
 
 #for plotting plot2
@@ -143,7 +133,54 @@ IRL_Covid19_plot2 %>%
   
 ```
 ```{r}
+library(tidyr)
+library(RColorBrewer)
 
+#normalise on per 100k population
+plot_3 <- IRL_counties_Covid19 %>%
+  mutate(ConfirmedC_per_100k =  round(100000  * ConfirmedC/Population,1))%>%
+  mutate(DailyCCase_per_100k =  round(100000  * DailyCCase/Population, 1))
 
+#get the cases for all counties on a 4 week period
+plot_3 <- plot_3[plot_3$TimeStamp == ymd("2021-01-01") | plot_3$TimeStamp ==ymd("2021-01-29"),]%>%
+  select(CountyName, ConfirmedC_per_100k, TimeStamp) %>% 
+  #subtract the previous value from current as in the dataframe we have two rows for one county
+  # with the data between the range of 4 weeks 
+  mutate(new_cases_4weeks = ConfirmedC_per_100k - lag(ConfirmedC_per_100k, 
+                                          default =  first(ConfirmedC_per_100k)))
 
+# as we have two entries for each county bases on difference we only keep the difference
+# value between the same county and discard the the other
+plot_3 <- plot_3[seq(2, nrow(plot_3), 2), ]
+#get the mean value of new cases found during the 4 week period
+mean = mean(plot_3$new_cases_4weeks)
+
+# selecting columns necessary for plotting
+plot_3<- plot_3 %>% 
+  select(CountyName, geometry, new_cases_4weeks)
+
+ggplot(plot_3) +
+  #sf geom for map based on geometry filling the case data
+  geom_sf(aes(fill = new_cases_4weeks))+
+  #using the diverging color palette
+  scale_fill_distiller(palette = "RdYlBu",
+                       #manually defining breaks
+                       
+                       breaks = c(4000,3000 ,mean, 1000),
+                
+                       #labels for the break
+                       labels = c("4000", "3000", paste("Mean: ", round(mean,2)), 1000),
+                       # for positioning the colorbar
+                       guide = guide_colorbar(
+                       label.position = "right",
+                       title = "New cases for the time period",
+                       barwidth = grid::unit(0.4, "cm"),
+                       barheight = grid::unit(3, "cm")))+
+  ggtitle("Comparing new covid cases in counties of Ireland from 1st Jan 21 to 29th Jan around the mean  ") +
+  labs(caption = "Source: Covid Data Ireland")+
+  theme_void()+
+  #formatting the graph
+  theme(plot.title = element_text(size = 10),
+        legend.title = element_text(size = 10))
+  
 ```

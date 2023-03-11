@@ -1,0 +1,26 @@
+---
+title: "Main"
+author: "Smitesh Patil"
+date: "2023-03-10"
+output: html_document
+---
+
+```{r include = False}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(igraph)
+
+
+g<- read_graph(file="./WordPairs.txt",format="pajek")
+g<- as.undirected(g)
+g<- simplify(g)
+
+#cues <- read.table("./cue.txt", header = F, sep="\t", skip=4)
+
+#V(g)$cue<-cues[[1]]
+
+print(diameter(g))
+
+```

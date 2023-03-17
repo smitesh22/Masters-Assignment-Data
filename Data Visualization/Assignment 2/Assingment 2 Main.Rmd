@@ -13,6 +13,7 @@ library(sf)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
+library(scales)
 library(colorblindr)
 
 #loading the shape file
@@ -44,21 +45,22 @@ mean_daily_cases <- IRL_Covid19_2021_12_21 %>%
 IRL_Covid19_2021_12_21 %>% 
   # creating color column for plotting color different for galay, less than mean and 
   #more than mean
-  mutate(color = ifelse(CountyName == "Galway", "1", 
-                        ifelse(ConfirmedC_per_100k < mean_daily_cases, "2", "3"))) %>%
+  mutate(color = ifelse(CountyName == "Galway", "1", "2")) %>%
   #loading aesthetics for the graphy reordering for sorting
   ggplot(aes(x = ConfirmedC_per_100k, y = reorder(CountyName,ConfirmedC_per_100k)))+
   #geom_point for dot plot
-  geom_point(size = 2, aes(color = color))+
+  geom_point(size = 2, aes(color = color, alpha = ifelse(color == "1", 1, 0.9)))+
   #mean line
   geom_vline(aes(xintercept = mean_daily_cases))+
   #support line
-  geom_linerange(aes(xmin = mean_daily_cases, xmax = ConfirmedC_per_100k, color = color),
+  geom_linerange(aes(xmin = mean_daily_cases, xmax = ConfirmedC_per_100k, color = color, 
+                     alpha = ifelse(color == "1", 1, 0.9)),
                  linetype = "dashed")+
   #setting colors and lables
-  scale_color_manual(values = c(palette[6], palette[5], palette[1]),
-                    labels = c("Galway", "Counties better than average",
-                               "Counties worse than average"))+
+  scale_color_manual(values = c(palette[6], palette[5]),
+                    labels = c("Galway", "Other Counties in Ireland"))+
+  #dropping alpha legend
+  scale_alpha(guide = 'none')+
   #changeing x ticks for graph
   scale_x_continuous(limits = c(10000, 19000),
                      breaks = seq(10000, 19000, by = 1000),
@@ -75,7 +77,8 @@ IRL_Covid19_2021_12_21 %>%
   labs(caption = "Source: Covid Data Ireland")+
   #for legend position
   theme(legend.position = "top",
-        legend.title = element_blank())
+        legend.title = element_blank(),
+         panel.grid.minor.x = element_blank())
 ```
 
 ```{r}
@@ -111,7 +114,7 @@ IRL_Covid19_plot2 %>%
   geom_smooth(data = select_county_data, aes(group = CountyName, color = CountyName), 
               size = 1, alpha = 0.8, na.rm = TRUE, method = "loess", se = FALSE)+
   # settings colors
-  scale_color_manual(values = c("#d3d3d3", palette[3],palette[6] , palette[4]), 
+  scale_color_manual(values = c("#d3d3d3", palette[3],palette[7] , palette[4]), 
                      labels = c("Others", "Galway", "Monaghan", "Wicklow"))+
   # setting labels on a sequence of values for y axis
   scale_y_continuous(limits = c(0, 19000),
@@ -128,9 +131,8 @@ IRL_Covid19_plot2 %>%
   theme(axis.text.x = element_text(angle = 50, vjust = 0.5, hjust=1),
         axis.title.x = element_text(vjust = -2.5),
         legend.position = "top",
-        legend.title = element_blank())
-
-  
+        legend.title = element_blank(),
+         panel.grid.minor = element_blank())
 ```
 ```{r}
 library(tidyr)
@@ -162,20 +164,35 @@ plot_3<- plot_3 %>%
 ggplot(plot_3) +
   #sf geom for map based on geometry filling the case data
   geom_sf(aes(fill = new_cases_4weeks))+
-  #using the diverging color palette
-  scale_fill_distiller(palette = "RdYlBu",
-                       #manually defining breaks
-                       
-                       breaks = c(4000,3000 ,mean, 1000),
-                
-                       #labels for the break
-                       labels = c("4000", "3000", paste("Mean: ", round(mean,2)), 1000),
+  #hex values for RdYlBu pallete
+  scale_fill_gradient2(#colors = c("#d73027", "white", "#4575b4"),  
+                       #values = rescale(c(4000, mean, 0)),
                        # for positioning the colorbar
+                       low = "#74add1",
+                       mid = "#e0f3f8",
+                       high = "#a50026",
+                       midpoint = mean,
+                       breaks = c(4000,3000, mean, 1000),
+                       labels = c("4000", "3000", paste0("Mean:", round(mean,2)), "1000"),
                        guide = guide_colorbar(
                        label.position = "right",
                        title = "New cases for the time period",
                        barwidth = grid::unit(0.4, "cm"),
-                       barheight = grid::unit(3, "cm")))+
+                       barheight = grid::unit(3, "cm"))
+                       )+
+  #using the diverging color palette
+  # scale_fill_distiller(palette = "RdYlBu",
+  #                      #manually defining breaks
+  #                      breaks = c(4000,3000 ,mean, 1000),
+  # 
+  #                      #labels for the break
+  #                      labels = c("4000", "3000", paste("Mean: ", round(mean,2)), 1000),
+  #                      # for positioning the colorbar
+  #                      guide = guide_colorbar(
+  #                      label.position = "right",
+  #                      title = "New cases for the time period",
+  #                      barwidth = grid::unit(0.4, "cm"),
+  #                      barheight = grid::unit(3, "cm")))+
   ggtitle("Comparing new covid cases in counties of Ireland from 1st Jan 21 to 29th Jan around the mean  ") +
   labs(caption = "Source: Covid Data Ireland")+
   theme_void()+

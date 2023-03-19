@@ -5,6 +5,7 @@ date: "2023-03-10"
 output:
   pdf_document: default
   html_document: default
+  
 ---
 
 ```{r setup, include=TRUE, cache = FALSE}
@@ -94,13 +95,13 @@ target_word2 <- "DICTIONARY"
 
 check_cue_words(target_word1, target_word2)
 
-out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 200)
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 160)
 
 Vertices_in_word_association <- V(g)[name %in% out]
 
-word_association_network <- induced.subgraph(g, Vertices_in_word_association)
+word_association_network1 <- induced.subgraph(g, Vertices_in_word_association)
 
-centrality = centralities(word_association_network)
+centrality = centralities(word_association_network1)
 
 df <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
 colnames(df) <- c("page_rank", "betweeness", "eigen_centrality")
@@ -108,43 +109,42 @@ colnames(df) <- c("page_rank", "betweeness", "eigen_centrality")
 df %>% gt() %>%
   tab_header(paste0("Top 5 words based on centralities based on word association network for
              words ",target_word1 , " and ",target_word2))
-vertex_size <- 2.5 + degree(g)/1.5
-cex_size <-2 + degree(g)/12
+vertex_size <- 2.5 + degree(g)/12
+cex_size <-2 + degree(g)/36
 
 #ggraph(word_association_network, layout = "fr") 
-
-plot(word_association_network,
-     layout=layout_with_dh(word_association_network),
-     vertex.color= ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          rgb(243/255,243/255, 15/255, 0.6),
-                          rgb(0, 0, 0, 0.2)),
-     vertex.size = ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          10,
-                          5),
-     vertex.label.cex=ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          0.3,
-                          0.2),
-     vertex.label.dist=0,
-     edge.curved=0.2,
-     edge.width=0.4,
-     edge.arrow.size=0.01,
-     edge.color= rgb(0.5,0.5,0.5, 0.3))
+vertex_size <- 2.5 + degree(word_association_network1)/10
+cex_size <-2 + degree(word_association_network1)/30
+ggraph(word_association_network1, layout = "fr")+
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2)+
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(word_association_network1) %in% c("HEART", "HEAD"), "yellow","red")) +
+  geom_node_text(
+      aes(label = name),
+      fontface = "bold",
+      size = cex_size,
+      repel = TRUE
+    ) 
 ```
 
 ```{r}
 
-target_word1 <- "ABDOMEN"
-target_word2 <- "STOMACH"
+target_word1 <- "CRIME"
+target_word2 <- "TRIAL"
 
 check_cue_words(target_word1, target_word2)
 
-out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 100)
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 160)
 
 Vertices_in_word_association <- V(g)[name %in% out]
 
-word_association_network <- induced.subgraph(g, Vertices_in_word_association)
+word_association_network2 <- induced.subgraph(g, Vertices_in_word_association)
 
-centrality = centralities(word_association_network)
+centrality = centralities(word_association_network2)
 
 df <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
 colnames(df) <- c("page_rank", "betweeness", "eigen_centrality")
@@ -153,23 +153,22 @@ df %>% gt() %>%
   tab_header(paste0("Top 5 words based on centralities based on word association network for
              words ",target_word1 , " and ",target_word2))
 
-plot(word_association_network,
-     layout=layout_with_dh(word_association_network),
-     vertex.color= ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          rgb(243/255,243/255, 15/255, 0.6),
-                          rgb(0, 0, 0, 0.2)),
-     vertex.size = ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          10,
-                          5),
-     vertex.label.cex=ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          0.3,
-                          0.2), 
-     vertex.label.dist=0,
-     edge.curved=0.2,
-     edge.width=0.4,
-     edge.arrow.size=0.01,
-     edge.color= rgb(0.5,0.5,0.5, 0.3)
-)
+vertex_size <- 2 + degree(word_association_network2)/10
+cex_size <- 1 + degree(word_association_network2)/30
+ggraph(word_association_network2, layout = "fr")+
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2)+
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(word_association_network2) %in% c("HEART", "HEAD"), "yellow","red")) +
+  geom_node_text(
+      aes(label = name),
+      fontface = "bold",
+      size = cex_size,
+      repel = TRUE
+    ) 
 ```
 
 
@@ -179,13 +178,13 @@ target_word2 <- "HEART"
 
 check_cue_words(target_word1, target_word2)
 
-out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 100)
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 160)
 
 Vertices_in_word_association <- V(g)[name %in% out]
 
-word_association_network <- induced.subgraph(g, Vertices_in_word_association)
+word_association_network3 <- induced.subgraph(g, Vertices_in_word_association)
 
-centrality = centralities(word_association_network)
+centrality = centralities(word_association_network3)
 
 df <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
 colnames(df) <- c("page_rank", "betweeness", "eigen_centrality")
@@ -194,36 +193,35 @@ df %>% gt() %>%
   tab_header(paste0("Top 5 words based on centralities based on word association network for
              words ",target_word1 , " and ",target_word2))
 
-plot(word_association_network,
-     layout=layout_with_dh(word_association_network),
-     vertex.color= ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          rgb(243/255,243/255, 15/255, 0.6),
-                          rgb(0, 0, 0, 0.2)),
-     vertex.size = ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          10,
-                          5),
-     vertex.label.cex=ifelse(V(word_association_network)$name %in% c(target_word1, target_word2),
-                          0.3,
-                          0.2), 
-     vertex.label.dist=0,
-     edge.curved=0.2,
-     edge.width=0.4,
-     edge.arrow.size=0.01,
-     edge.color= rgb(0.5,0.5,0.5, 0.3)
-)
+vertex_size <- 2.5 + degree(word_association_network3)/10
+cex_size <-2 + degree(word_association_network3)/30
+ggraph(word_association_network3, layout = "fr")+
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2)+
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(word_association_network3) %in% c("HEART", "HEAD"), "yellow","red")) +
+  geom_node_text(
+      aes(label = name),
+      fontface = "bold",
+      size = cex_size,
+      repel = TRUE
+    ) 
 ```
 
 
 ```{r}
 #fast greedy community detection
-fc <- cluster_fast_greedy(word_association_network)
+cluster1 <- cluster_louvain(word_association_network1, weights = NA)
 #louvain community detection
-lv <- cluster_louvain(word_association_network)
+cluster2 <- cluster_louvain(word_association_network2, weights = NA)
 #walktrap community detection
-wt <- cluster_walktrap(word_association_network)
+cluster3 <- cluster_louvain(word_association_network3)
 
 create_community_table <- function(clustering_data){
-  strings <- NULL
+  strings <- c()
   lengths <- c()
   for(i in 1:length(clustering_data)){
     string = ""
@@ -231,22 +229,94 @@ create_community_table <- function(clustering_data){
       string = paste0(string, "'", word, "',")
     }
     
-    strings <- c(strings, string)
-    lengths <- c(lengths, length(clustering_data[[i]]))
+    strings <- append(strings, string)
+    lengths <- append(lengths, length(clustering_data[[i]]))
   }
-  
   df <- tibble(strings, lengths) %>%
-  arrange(desc(lengths))
+    filter(lengths > 1 ) 
   colnames(df) <- c("Cluster","Size")
   
   return(df)
 }
 
-View(create_community_table(fc))
 
-View(create_community_table(lv))
+community_table1 <- create_community_table(cluster1)
+community_table1 %>%
+  arrange(desc(Size)) %>%
+  kable() %>%
+  column_spec(column = 1, width = "5in")
 
-View(create_community_table(wt))
+community_table2 <- create_community_table(cluster2)
+community_table2 %>%
+  arrange(desc(Size)) %>%
+  kable() %>%
+  column_spec(column = 1, width = "5in")
+
+community_table3 <- create_community_table(cluster3)
+community_table3 %>%
+  arrange(desc(Size)) %>%
+  kable() %>%
+  column_spec(column = 1, width = "5in")
+```
+
+```{r, results='asis'}
+#loop on the communities
+
+define_community_labels <- function(cluster, dataframe){
+  community_label = c()
+  for (i in 1:length(cluster)){
+    
+    if (length(cluster[[i]]) > 1){
+      vertices_in_community <- V(g)[name %in% cluster[[i]]]
+      community_graph <- induced.subgraph(g, vertices_in_community)
+      page_rank <- page_rank(community_graph)$vector
+      label = sort(page_rank, decreasing = TRUE)[1]
+      community_label <- c(community_label, label)
+    }
+  }
+  dataframe<- dataframe %>% mutate(community_label = names(community_label))
+  
+  return(dataframe)
+}
+
+community_with_label<- define_community_labels(cluster1, community_table1)
+
+community_with_label %>%
+  arrange(desc(Size)) %>%
+  kable() %>%
+  column_spec(column = 1, width = "5in")
+
+define_community_labels(cluster2, community_table2) %>%
+  arrange(desc(Size)) %>%
+  kable() %>%
+  column_spec(column = 1, width = "5in")
+
+out <-define_community_labels(cluster3, community_table3) %>%
+  arrange(desc(Size)) 
+  
+
+kable(as.data.frame(out), booktabs = TRUE) %>%
+  kable_styling(full_width = TRUE) 
+  #column_spec(column = 1, width = "5in") 
+
+dt <- tibble(
+   Items = c("Item 1", "Item 2", "Item 3"),
+   Text_1 = c("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vehicula tempor ex. Morbi malesuada sagittis turpis, at venenatis nisl luctus a. ","In eu urna at magna luctus rhoncus quis in nisl. Fusce in velit varius, posuere risus et, cursus augue. Duis eleifend aliquam ante, a aliquet ex tincidunt in. ", "Vivamus venenatis egestas eros ut tempus. Vivamus id est nisi. Aliquam molestie erat et sollicitudin venenatis. In ac lacus at velit scelerisque mattis. "),
+   Text_2 = c("Duis posuere placerat magna, ac aliquam lorem viverra non. Ut ultrices tempus eros, quis sodales libero commodo non. In non neque ut lacus vestibulum dictum a quis ipsum. ", "Aenean ut justo interdum, laoreet enim nec, viverra eros. Donec vel pharetra nunc. Suspendisse vel ipsum ac lectus semper aliquam ac a orci. Suspendisse libero mauris, egestas semper auctor sit amet, tempor et orci. ", "Phasellus quis neque aliquet, finibus nunc eget, lacinia neque. Sed auctor lectus vel ex scelerisque commodo. ")
+)
+
+kable(dt, "latex", booktabs = T,
+col.names = c("Item", "Short Title", "Very Very Very Very Very Very Long Title")) %>%
+column_spec(2:3, width = "5cm")
+
+
+
+t1w <-out %>% mutate(cl = paste0('"',Cluster,'"')) %>% select(cl)
+
+kable( t1w, "latex", booktabs = T) %>%
+  column_spec(1, width = "10cm")
+
+
 ```
 
 

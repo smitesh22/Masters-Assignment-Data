@@ -1,5 +1,5 @@
 ---
-title: "Assingment 2 Main"
+title: "Assingment 2 - Part 2"
 author: "Smitesh Patil"
 date: "2023-03-06"
 output: pdf_document
@@ -23,6 +23,8 @@ options(warn=-1)
 knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 
 ```
+
+Q2. A visualisation that allows the reader to read how each county diverges from from the mean cumulative number of cases (per 100,000) in the country as at the 21 December 2021. You may also use a daily figure in this section. County Galway should be highlighted
 
 ```{r}
 #loading colorblind colors
@@ -58,7 +60,7 @@ IRL_Covid19_2021_12_21 %>%
                  linetype = "dashed")+
   #setting colors and lables
   scale_color_manual(values = c(palette[6], palette[5]),
-                    labels = c("Galway", "Other Counties in Ireland"))+
+                    guide='none')+
   #dropping alpha legend
   scale_alpha(guide = 'none')+
   #changeing x ticks for graph
@@ -72,7 +74,7 @@ IRL_Covid19_2021_12_21 %>%
   #theme set
   theme_minimal()+
   #title
-  ggtitle("Confirmed Cases for counties compared to average on 21st Dec 21")+
+  ggtitle("Fig 1. Confirmed Cases for counties compared to average on 21st Dec 21")+
   #caption
   labs(caption = "Source: Covid Data Ireland")+
   #for legend position
@@ -80,6 +82,16 @@ IRL_Covid19_2021_12_21 %>%
         legend.title = element_blank(),
          panel.grid.minor.x = element_blank())
 ```
+Analysis and Changes made: I have gone with the same diverging dot plot (mistakenly mentioned as bar chart in part 1) mentioned in the part 1, but there are a couple of changes that I have made, First, the color for counties that diverge above the value of mean and below are the same (except for county galway which is highlighted) as they lie on the opposite sides of the mean line they appear distinct and hence, they don't need to be colored differently. Second, the alpha values of counties other than galway is decreased so that County Galway is highlighted compared to others.
+
+
+
+\
+\
+\
+\
+
+Q4. A visualisation that highlights the cumulative number of cases per 100,000 in Galway and two other counties representing counties that have had the lowest and highest number of cases per 100,000 over the full timeline of the dataset. The visualisaton must also show the cumulative case number for all other counties in Ireland in the same plot. However, the three selected counties (Galway and two other counties) must be highlighted)
 
 ```{r}
 #normalising for plotting
@@ -124,7 +136,7 @@ IRL_Covid19_plot2 %>%
   scale_x_date(date_breaks = "months", date_labels = "%b-%y", 
                name = "Time -->")+
   #title
-  ggtitle("Cumulative Covid cases in Galway compared to Other counties")+
+  ggtitle("Fig 2. Cumulative Covid cases in Galway compared to Other counties")+
   #labels
   labs(caption = "Source: Covid Data Ireland")+
   theme_minimal()+
@@ -134,6 +146,12 @@ IRL_Covid19_plot2 %>%
         legend.title = element_blank(),
          panel.grid.minor = element_blank())
 ```
+Analysis and changes made : while plotting the trend lines, the alpha values of counties other thaa galway and other 2 were set to be less for them to be in the background. for getting the counties with highest and lowest number of cumulative cases the number of cumulative cases on last day in the dataframe 21-12-2021 was consider and the highest and lowest values were filtered. 
+
+
+Q5. A choropleth visualisation of the counties of Ireland showing total new confirmed cases (per 100,000) for a 4-week period (of your choice) for each county. The choropleth should show how each county diverges from the mean number of new confirmed cases (per 100,000) per county for that 4-week period.
+
+
 ```{r}
 library(tidyr)
 library(RColorBrewer)
@@ -164,6 +182,7 @@ plot_3<- plot_3 %>%
 ggplot(plot_3) +
   #sf geom for map based on geometry filling the case data
   geom_sf(aes(fill = new_cases_4weeks))+
+  geom_sf_text(aes(label = CountyName), size = 1.8)+
   #hex values for RdYlBu pallete
   scale_fill_gradient2(#colors = c("#d73027", "white", "#4575b4"),  
                        #values = rescale(c(4000, mean, 0)),
@@ -171,29 +190,19 @@ ggplot(plot_3) +
                        low = "#74add1",
                        mid = "#e0f3f8",
                        high = "#a50026",
+                       #setting the gradient midpoint on mean the value 
                        midpoint = mean,
                        breaks = c(4000,3000, mean, 1000),
                        labels = c("4000", "3000", paste0("Mean:", round(mean,2)), "1000"),
+                       #for setting the color bar
                        guide = guide_colorbar(
                        label.position = "right",
                        title = "New cases for the time period",
                        barwidth = grid::unit(0.4, "cm"),
                        barheight = grid::unit(3, "cm"))
                        )+
-  #using the diverging color palette
-  # scale_fill_distiller(palette = "RdYlBu",
-  #                      #manually defining breaks
-  #                      breaks = c(4000,3000 ,mean, 1000),
-  # 
-  #                      #labels for the break
-  #                      labels = c("4000", "3000", paste("Mean: ", round(mean,2)), 1000),
-  #                      # for positioning the colorbar
-  #                      guide = guide_colorbar(
-  #                      label.position = "right",
-  #                      title = "New cases for the time period",
-  #                      barwidth = grid::unit(0.4, "cm"),
-  #                      barheight = grid::unit(3, "cm")))+
-  ggtitle("Comparing new covid cases in counties of Ireland from 1st Jan 21 to 29th Jan around the mean  ") +
+
+  ggtitle("Fig 3. Comparing new covid cases in Ireland from 1st Jan 21 to 29th Jan around the mean") +
   labs(caption = "Source: Covid Data Ireland")+
   theme_void()+
   #formatting the graph
@@ -201,3 +210,8 @@ ggplot(plot_3) +
         legend.title = element_text(size = 10))
   
 ```
+
+
+Analysis and changes made : New confirmed cases were plotted for time range  1st of Jan 2021 to 29th of Jan 2021, The calculations were calculated from the similar way as described in part1 with a minor difference. Inilially, I was normalising the new confirmed data by subtracting the value by the mean, so the values would be diverging around 0, hence, the counties with positive values would have seen a increase in cases compared to mean new cases in Ireland and vice versa for negative values. But the problem with that approach was that a important statistic, the mean increase in new case would be missing as we normalised around the mean. Therefore, I have not normalised the data and have set the cholorpeth midpoint at mean for a divering color bar.
+
+Additionally, The RdYlBu pallete was not visually coherent on the choropleth as the mean value lies slighly below the median of data, hence, I have went with the RdBu (Red Blue) diverging pallette for the choropleth.

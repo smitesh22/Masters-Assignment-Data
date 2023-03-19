@@ -7,8 +7,10 @@ output:
   html_document: default
 ---
 
-```{r setup, include=TRUE, cache = FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE}
+
+options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
 ```
 
 
@@ -66,7 +68,7 @@ random_walk_topic_network <- function(g,target_node_names, steps, walks, mode, t
   for (i in 1:walks){
     vertices_2 <- c(vertices_2, list(random_walk(g, target_node_names[2], steps, mode = mode)))
   }
-  frequency_target2 <- head(sort(table(names(unlist(vertices_2))), decreasing = TRUE), 100)
+  frequency_target2 <- head(sort(table(names(unlist(vertices_2))), decreasing = TRUE), topn)
   unique_words2 <- names(frequency_target2)
 
 
@@ -99,7 +101,7 @@ target_word2 <- "DICTIONARY"
 
 check_cue_words(target_word1, target_word2)
 
-out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 200)
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 160)
 
 Vertices_in_word_association <- V(g)[name %in% out]
 
@@ -143,7 +145,7 @@ target_word2 <- "STOMACH"
 
 check_cue_words(target_word1, target_word2)
 
-out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 10)
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 160)
 
 Vertices_in_word_association <- V(g)[name %in% out]
 
@@ -184,7 +186,7 @@ target_word2 <- "HEART"
 
 check_cue_words(target_word1, target_word2)
 
-out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 10)
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 160)
 
 Vertices_in_word_association <- V(g)[name %in% out]
 

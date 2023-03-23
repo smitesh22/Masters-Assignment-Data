@@ -1,0 +1,49 @@
+---
+title: "Assignment 2 part 2"
+author: "Smitesh Patil"
+date: "2023-03-21"
+output: pdf_document
+---
+
+```{r include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+#ignore warnings
+options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+\normalsize Q2.4 Provide a brief interpretation of the meaningful contextual topics uncovered by the
+community detection algorithm for each word pair. If the uncovered topic appears to have no
+apparent relevance to either of the words in your word pair you may declare it as ‘nonrelevant’. You can present these interpretations in the same table where the communities are
+listed, if there is room. If you present the interpretations in a separate table, the rows must be
+numbered to refer to the community numbers in the first table.
+
+```{r}
+table1 <- as_tibble(read.csv("table1.csv"))
+
+table2 <- as_tibble(read.csv("table2.csv"))
+
+table3 <- as_tibble(read.csv("table3.csv"))
+```
+
+```{r}
+
+table1 %>% 
+  arrange(desc(Size)) %>%
+  filter(Size > 3)
+  select
+
+
+table2 %>% 
+  arrange(desc(Size)) %>%
+  filter(Size > 3)
+
+
+table3 %>% 
+  arrange(desc(Size)) %>%
+  filter(Size > 3)
+
+```
+
+
+

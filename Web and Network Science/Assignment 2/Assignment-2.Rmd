@@ -276,7 +276,7 @@ centrality %>%
         font_size = 8
     )
 ```
-\large Section 3.1 [Q1.2]: Analysis of network and effects of Personalised Page Rank and 
+\large Section 3.1: Analysis of network and effects of Personalised Page Rank and 
 Random walk on association network creation.
 
 \normalsize 
@@ -288,22 +288,11 @@ For Random Walk it was observed that as the number of walks and size of vertices
 For Personalised Page Rank every time nodes are ranked randomly some nodes are given more weight so that there is a chance for other nodes to be more relevant based on the damping factor, it was found that a high damping factor yields better results on community detection, i.e more communities of ideal size and coherent nodes.
 
 
-\large Section 3.2 [Q1.2]: Analysis of Centrality Measures on the word association networks.
+\large Section 3.2: Analysis of Centraility Measures on the word association networks.
 
 \normalsize
 
-Words of similar contexts seem to be appearing in the subgraph (association networks) created
-using both random walk algorithm and personalised page rank algorithm. The words from the word
-pairs seem to be top words based on centrality and authority measures as they are the root 
-words used to generate the association networks this virtue of the networks makes sense. 
-For example, for the first network generated using words "Court and Lawyers" seems to have
-both court and lawyer appear high on all of the centraility measures. Whereas, for the 
-other two networks the words do appear in the list but they don't seem to have the same level
-of centraility attribute as the first word network. This maybe because, the first network
-was created using random walk whereas the later two where created using personalised page
-rank.
-
-
+skcs
 ```{r fig.width= 9, fig.height=5}
 
 #plotting network

@@ -1,0 +1,309 @@
+---
+title: "Main2"
+author: "Aditi Sonkusare"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+
+options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+```{r}
+library(igraph)
+library(kableExtra)
+library(tidyr)
+
+
+# reading the graph 
+wordpairs<- read_graph(file="./WordPairs.txt",format="pajek")
+wordpairs<- as.undirected(wordpairs)
+wordpairs<- simplify(wordpairs)
+
+cues <- read.table("./cue.txt", header = F, sep="\t", skip=4)
+
+V(wordpairs)$cue<-cues[[1]]
+
+#checking the diameter value
+print(diameter(wordpairs, weights = NA))
+
+```
+
+```{r}
+check_cue <- function(target1, target2){
+  if(V(wordpairs)[target1]$cue & V(wordpairs)[target2]$cue){
+    cat("Both the targets are cue words \n")
+  }else{
+    cat("Both words are not cue words \n")
+    cat(target1, "cue = ", as.logical(V(wordpairs)[target1]$cue), "\n")
+    cat(target2, "cue = ", as.logical(V(wordpairs)[target2]$cue), "\n")
+  }
+}
+```
+
+
+```{r}
+
+random_walk_topic_network <- function(wordpairs,target_node_names, steps, walks, mode, topn){
+  list1 <- c()
+  for (i in 1:walks){
+    list1 <- c(list1, list(random_walk(wordpairs, target_node_names[1], steps, mode = mode)))
+  }
+  frequency_words1 <- head(sort(table(names(unlist(list1))), decreasing = TRUE), 100)
+  unique_words1 <- names(frequency_words1)
+
+  list2 <- c()
+  for (i in 1:walks){
+    list2 <- c(list2, list(random_walk(wordpairs, target_node_names[2], steps, mode = mode)))
+  }
+  frequency_words2 <- head(sort(table(names(unlist(list2))), decreasing = TRUE), topn)
+  unique_words2 <- names(frequency_words2)
+
+
+  output = append(unique_words1, unique_words2)
+  return(unique(output))
+
+}
+
+
+page_rank_ppr <- function(g, names, damping , topn){
+
+  teleport_probs <- rep(0,vcount(g))
+  teleport_probs[as.numeric(V(g)[names])]<-1/length(names)
+  
+  pr<- page_rank(g,  directed = F, 
+                 personalized=teleport_probs, 
+                 damping = damping)$vector
+  
+  top_n_pr <- order(pr, decreasing=TRUE)[1:topn]
+  
+  top_n_pr<-V(g)[top_n_pr]
+}
+
+page_rank_ppr(g, c("HEAD", "HEART"), 0.85, 160)
+
+centralities = function(word_association_network){
+  eccentricity <- eccentricity(word_association_network)
+  #eccentricity <- na.omit(eccentricity[!names(eccentricity) %in% c(target_word1, target_word2)])
+  eccentricity <- head(sort(eccentricity, decreasing = TRUE), 5)
+
+  betweenness <- betweenness(word_association_network)
+  #betweenness <- betweenness[!names(betweenness) %in% c(target_word1, target_word2)]
+  betweenness <- head(sort(betweenness, decreasing = TRUE), 5)
+
+  eigen_centrality <- eigen_centrality(word_association_network)$vector
+  #eigen_centrality <- eigen_centrality[!names(eigen_centrality) %in% c(target_word1, target_word2)]
+  eigen_centrality <- head(sort(eigen_centrality, decreasing = TRUE), 5)
+  return(list(eccentricity, betweenness, eigen_centrality))
+}
+
+```
+
+```{r}
+target1 <- "SKILL"
+target2 <- "POTENTIAL"
+
+check_cue(target1, target2)
+
+output <- random_walk_topic_network(wordpairs, c(target1, target2), 3, 100, "all", 160)
+
+association <- V(wordpairs)[name %in% output]
+
+association_network <- induced.subgraph(wordpairs, association)
+
+centrality = centralities(association_network)
+
+graph1 <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
+colnames(graph1) <- c("eccentricity", "betweeness", "eigen_centrality")
+
+graph1 %>% kbl(booktabs = TRUE) %>%
+   kable_styling(full_width = F)
+
+vertex_size <- 2.5 + degree(wordpairs)/1.5
+cex_size <-2 + degree(wordpairs)/12
+
+#ggraph(word_association_network, layout = "fr") 
+
+plot(association_network,
+      layout=layout_with_dh(association_network),
+      vertex.color= ifelse(V(association_network)$name %in% c(target1, target2),
+                           rgb(243/255,243/255, 15/255, 0.6),
+                           rgb(0, 0, 0, 0.2)),
+      vertex.size = ifelse(V(association_network)$name %in% c(target1, target2),
+                           15,
+                           7),
+      vertex.label.cex=ifelse(V(association_network)$name %in% c(target1, target2),
+                           0.9,
+                           0.5), 
+      vertex.label.dist=0,
+      edge.curved=0.2,
+      edge.width=0.4,
+      edge.arrow.size=0.01,
+      edge.color= rgb(0.5,0.5,0.5, 0.3))
+```
+
+```{r}
+target1 <- "A"
+target2 <- "ALPHABET"
+
+check_cue(target1, target2)
+
+output <- random_walk_topic_network(wordpairs, c(target1, target2), 3, 100, "all", 160)
+
+association <- V(wordpairs)[name %in% output]
+
+association_network <- induced.subgraph(wordpairs, association)
+
+centrality = centralities(association_network)
+
+graph1 <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
+colnames(graph1) <- c("eccentricity", "betweeness", "eigen_centrality")
+
+graph1 %>% kbl(booktabs = TRUE) %>%
+   kable_styling(full_width = F)
+
+vertex_size <- 2.5 + degree(wordpairs)/1.5
+cex_size <-2 + degree(wordpairs)/12
+
+#ggraph(word_association_network, layout = "fr") 
+
+plot(association_network,
+      layout=layout_with_dh(association_network),
+      vertex.color= ifelse(V(association_network)$name %in% c(target1, target2),
+                           rgb(243/255,243/255, 15/255, 0.6),
+                           rgb(0, 0, 0, 0.2)),
+      vertex.size = ifelse(V(association_network)$name %in% c(target1, target2),
+                           15,
+                           7),
+      vertex.label.cex=ifelse(V(association_network)$name %in% c(target1, target2),
+                           0.9,
+                           0.5), 
+      vertex.label.dist=0,
+      edge.curved=0.2,
+      edge.width=0.4,
+      edge.arrow.size=0.01,
+      edge.color= rgb(0.5,0.5,0.5, 0.3))
+```
+
+```{r}
+#plot(wordpairs,
+#     layout = layout_with_kk(wordpairs),
+#     vertex.color = cols,
+#     vertex.frame.color=ifelse(V(wordpairs) == v, "green3", "grey"))
+```
+
+```{r}
+
+target1 <- "MISSING"
+target2 <- "KIDNAP"
+
+check_cue(target1, target2)
+
+output <- random_walk_topic_network(wordpairs, c(target1, target2), 3, 100, "all", 160)
+
+association <- V(wordpairs)[name %in% output]
+
+association_network <- induced.subgraph(wordpairs, association)
+
+centrality = centralities(association_network)
+
+graph1 <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
+colnames(graph1) <- c("eccentricity", "betweeness", "eigen_centrality")
+
+graph1 %>% kbl(booktabs = TRUE) %>%
+   kable_styling(full_width = F)
+vertex_size <- 2.5 + degree(wordpairs)/1.5
+cex_size <-2 + degree(wordpairs)/12
+
+plot(association_network,
+      layout=layout_with_dh(association_network),
+      vertex.color= ifelse(V(association_network)$name %in% c(target1, target2),
+                           rgb(243/255,243/255, 15/255, 0.6),
+                           rgb(0, 0, 0, 0.2)),
+      vertex.size = ifelse(V(association_network)$name %in% c(target1, target2),
+                           15,
+                           7),
+      vertex.label.cex=ifelse(V(association_network)$name %in% c(target1, target2),
+                           0.9,
+                           0.5), 
+      vertex.label.dist=0,
+      edge.curved=0.2,
+      edge.width=0.4,
+      edge.arrow.size=0.01,
+      edge.color= rgb(0.5,0.5,0.5, 0.3))
+
+```
+
+```{r}
+#fast greedy community detection
+fc <- cluster_fast_greedy(association_network)
+#louvain community detection
+lv <- cluster_louvain(association_network)
+#walktrap community detection
+wt <- cluster_walktrap(association_network)
+
+community_table <- function(clustering_data){
+  strings <- NULL
+  lengths <- c()
+  for(i in 1:length(clustering_data)){
+    string = ""
+    for(word in clustering_data[[i]]){
+      string = paste0(string, "'", word, "',")
+    }
+    
+    strings <- c(strings, string)
+    lengths <- c(lengths, length(clustering_data[[i]]))
+  }
+  
+  df <- tibble(strings, lengths)
+  #arrange(desc(lengths))
+  colnames(df) <- c("Cluster","Size")
+  
+  return(df)
+}
+
+View(community_table(fc))
+
+View(community_table(lv))
+
+View(community_table(wt))
+```
+
+
+
+
+
+```{r}
+library(tibble)
+library(tidyverse)
+lables_community <- function(cluster, table){
+  central_label <- c()
+  for(i in 1:length(cluster)){
+    graph<- induced.subgraph(g, V(g)[cluster[[i]]])
+    
+    central_label <- c(central_label,
+                       names(sort(eigen_centrality(graph)$vector, decreasing = T)[1]))
+  }
+  
+  table <- table %>% add_column(lable = central_label) %>% arrange(desc(Size))
+  
+  return(table)
+}
+
+out <- lables_community(fc, community_table(fc))
+out
+```
+
+```{r}
+#g <- upgrade_graph(karate)
+#layt <- layout_with_graphopt(g)
+
+# Plot the network with community labels
+plot(fc, layout = layt, vertex.frame.color="gray", vertex.label.color="black", vertex.label.cex=0.7, edge.curved=0.2, edge.width=0.8)
+```
+
+

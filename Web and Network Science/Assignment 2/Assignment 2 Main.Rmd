@@ -1,0 +1,735 @@
+---
+title: "Assignment 2"
+author: "Smitesh Patil"
+date: "2023-03-10"
+geometry: "left=1cm,right=1cm,top=2cm,bottom=2cm"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+latex_engine: pdflatex
+documentclass: article
+classoption: potrait
+header-includes: \usepackage{helvet} \renewcommand\familydefault{\sfdefault}
+---
+
+```{r setup, include=FALSE, cache = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#ignore warnings
+options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+\huge PART 1
+
+\large Section 1: Set up the libraries and check the input data
+
+```{r} 
+#importing all the necessary libraries
+library(igraph)
+library(ggraph)
+library(ggrepel)
+library(kableExtra)
+library(gt)
+library(tidyr)
+library(dplyr)
+
+set.seed(200)
+# reading the graph 
+g<- read_graph(file="./WordPairs.txt",format="pajek")
+#removing directions 
+g<- as.undirected(g)
+g<- simplify(g)
+
+#reading the cue text file for setting the cue attribute for graph
+cues <- read.table("./cue.txt", header = F, sep="\t", skip=4)
+
+#setting the cue attribute
+V(g)$cue<-cues[[1]]
+
+#checking the diameter value
+print(paste0("Diameter of the network: ", diameter(g, weights = NA)))
+
+```
+
+```{r}
+
+check_cue_words <- function(target_node_name1, target_node_name2){
+# test if the selected words are cue words
+  
+  if(V(g)[target_node_name1]$cue & V(g)[target_node_name2]$cue){
+    cat("Both target words are cue words \n")
+  }else{
+    cat("Both target words are NOT cue words \n")
+    cat(target_node_name1, "cue = ", as.logical(V(g)[target_node_name1]$cue ),"\n")
+    cat(target_node_name2, "cue = ", as.logical(V(g)[target_node_name2]$cue ),"\n")
+  }
+}
+
+```
+
+\large Section 2 [Q1.1]: Create Random Walk and personalised page rank functions
+
+\normalsize 
+
+Q1.1 Extract a word association sub-network around each pair of words by sampling the
+graph in the vicinity of each word. The sub-network for each pair of words should be
+between 100 and 200 words. The objective is to build a word association network around
+your pair of words that will capture all the semantic contexts your target words belong to –
+without bringing in irrelevant contexts.
+
+
+```{r}
+# 
+# UTLITY FUNCTIONS for 
+#   1. creating word association network, 
+#   2. centralities
+#   3. plot tables
+#   4. plotting the graph
+#in this cell
+
+#-----------------------------Q1.1----------------------------------------------
+#random walk function
+random_walk_topic_network <- function(g,target_node_names, steps, walks, mode, topn){
+  #initialising a empty vector
+  vertices <- c()
+  #looping on the two target names
+  for (i in 1:2){
+    #looing on the number of walks
+    for (j in 1:walks){
+     #running randow walk and appending the vertices to the list
+     vertices <- c(vertices, list(random_walk(g, target_node_names[i], steps, mode = mode)))
+   }
+  }
+  
+  #calculating the frequency of words appeared in the vertices vector and subsetting top n
+  frequency_target <- head(sort(table(names(unlist(vertices))), decreasing = TRUE), topn)
+  #getting unique words
+  unique_words <- names(frequency_target)
+  
+  #preparing and returning vertices in graph format
+  vertices_in_word_association <- V(g)[name %in% unique_words]
+  return(vertices_in_word_association)
+}
+
+#page rank function
+page_rank_network <- function(g, target_node_names, topn, damping){
+  #storing probabilites for all the vertices in the graph
+  teleport_probs <- rep(0,vcount(g))
+  teleport_probs[as.numeric(V(g)[target_node_names])]<-1/length(target_node_names)
+  #running page rank with parameters passed
+  pr <- page_rank(g,  directed = F, personalized=teleport_probs, damping = damping)$vector
+  # getting top n vertices
+  top_n_pr <- order(pr, decreasing=TRUE)[1:topn]
+  top_n_pr<-V(g)[top_n_pr]
+  
+  #returning the vertices
+  return(top_n_pr)
+}
+
+#-----------------------------Q1.2----------------------------------------------
+#centrailites function for getting top vertices based on centrailites
+centralities = function(word_association_network){
+  #page rank centralities
+  page_rank <- page_rank(word_association_network)$vector
+  page_rank <- na.omit(page_rank[!names(page_rank) %in% c(target_word1, target_word2)])
+  #getting five highest values
+  page_rank <- sort(page_rank, decreasing = TRUE)[1:5]
+
+  #betweeness centralities 
+  betweenness <- betweenness(word_association_network)
+  betweenness <- betweenness[!names(betweenness) %in% c(target_word1, target_word2)]
+  #getting five highest values
+  betweenness <- sort(betweenness, decreasing = TRUE)[1:5]
+
+  #eigen centralities
+  eigen_centrality <- eigen_centrality(word_association_network)$vector
+  eigen_centrality <- eigen_centrality[!names(eigen_centrality) %in% c(target_word1, target_word2)]
+  #getting five highest values
+  eigen_centrality <- sort(eigen_centrality, decreasing = TRUE)[1:5]
+  
+  #returning all the centralities in the list
+  return(tibble("Page Rank" = names(page_rank) , 
+                "Betweeness" = names(betweenness),
+                "Eigen Centrality"= names(eigen_centrality)))
+}
+
+# plot the table dataframe
+plot_table <- function(df, type){
+  df %>%
+  knitr::kable(
+      format = "latex",
+      align = "c",
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      caption = paste0("Centrality Score for three word pairs using ", type)
+      ) %>%
+  add_header_above(c("Index" = 1,
+                     "Scores for wordpair Court & Lawyers" = 3,
+                     "Scores for wordpair Children & Parents" = 3,
+                     "Scores for wordpair King & Royal" = 3)) %>%
+    kableExtra::kable_paper(
+        position = "center",
+        latex_options = c("striped", "repeat_header", "scale_down"),
+        stripe_color = "gray!15",
+        font_size = 8
+    )
+}
+
+#-----------------------------Q1.3----------------------------------------------
+#plotting the graph
+plot_graph = function(association_network, vertex_size, label_size, 
+                      target_word1, target_word2, count, type){
+  # getting top 25 nodes  with high degree to label
+  label_data <- names(sort(degree(association_network), decreasing = TRUE)[1:25])
+  
+  #setting vertex size
+  vertex_size <- 2.5 + degree(association_network, mode = "all")/vertex_size
+  cex_size <-2 + degree(association_network, mode = "all")/label_size
+  
+  #graph creation
+  ggraph(association_network, layout = "fr")+
+  #creating edges
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2)+
+  #parameters for nodes
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    repel = TRUE,
+                    # setting distinct color for word pair
+                    colour = ifelse(V(association_network)$name %in%
+                                      c(target_word1, target_word2), "yellow","red"))+
+  geom_node_text(
+      # setting labels for word pair and top 25 nodes by degree
+      aes(label = ifelse(V(association_network)$name %in% c(label_data, target_word1, target_word2),
+                         name, NA)),
+      fontface = "bold",
+      position = "identity",
+      size = cex_size,
+      repel = TRUE
+      
+    ) +
+  #title
+  ggtitle(paste0("Figure No. ", count, " association network for words ", target_word1,
+                 " and ", target_word2, " using ", type))+
+  #turning off legend
+  guides(size = FALSE)+
+  theme(plot.title = element_text(size = 10,
+                                  hjust = 0.5))
+}
+```
+
+\large Section 3: Simulate the function on three word pairs and justify the paramters
+
+```{r}
+#target words
+target_word1 <- "COURT"
+target_word2 <- "LAWYER"
+
+#checking the cue words
+check_cue_words(target_word1, target_word2)
+
+#calling the function
+out1_rand <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 100, "all", 130)
+out1_page <- page_rank_network(g, c(target_word1, target_word2), 140, 0.95)
+
+#creating a subgraph with the vertices returned by random walk/ Personalised page rank
+word_association_network1_rand <- induced.subgraph(g, out1_rand)
+word_association_network1_page <- induced.subgraph(g, out1_page)
+
+#target words
+target_word1 <- "CHILDREN"
+target_word2 <- "PARENTS"
+
+#checking the cue words
+check_cue_words(target_word1, target_word2)
+
+#calling the function
+out2_rand <-  random_walk_topic_network(g, c(target_word1, target_word2), 3, 50, "all", 160)
+out2_page <- page_rank_network(g, c(target_word1, target_word2), 140, 0.85)
+
+#creating a subgraph with the vertices returned by random walk/ Personalised page rank
+word_association_network2_rand <- induced.subgraph(g, out2_rand)
+word_association_network2_page <- induced.subgraph(g, out2_page)
+
+#target words
+target_word1 <- "KING"
+target_word2 <- "ROYAL"
+
+#checking the cue words
+check_cue_words(target_word1, target_word2)
+
+#calling the function
+out3_rand <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 50, "all", 160)
+out3_page <- page_rank_network(g, c(target_word1, target_word2), 150, 0.95)
+
+#creating a subgraph with the vertices returned by random walk/ Personalised page rank
+word_association_network3_rand <- induced.subgraph(g, out3_rand)
+word_association_network3_page <- induced.subgraph(g, out3_page)
+
+#calling the centralites function
+centrality1_rand = centralities(word_association_network1_rand)
+centrality2_rand = centralities(word_association_network2_rand)
+centrality3_rand = centralities(word_association_network3_rand)
+
+centrality1_page = centralities(word_association_network1_page)
+centrality2_page = centralities(word_association_network2_page)
+centrality3_page = centralities(word_association_network3_page)
+
+#plot dataframe
+centrality_random <- tibble(tibble("No."=1:5), centrality1_rand, 
+                                        centrality2_rand, 
+                                        centrality3_rand,
+                     .name_repair = "minimal")
+
+centrality_page <- tibble(tibble("No."=1:5), centrality1_page, 
+                                        centrality2_page, 
+                                        centrality3_page,
+                     .name_repair = "minimal")
+plot_table(df = centrality_random, type = "Random Walk")
+
+plot_table(df = centrality_page, type = "Personalised Page Rank")
+  
+```
+\large Section 3.1 [Q1.2]: Analysis of network and effects of Personalised Page Rank and 
+Random walk on association network creation.
+
+\normalsize 
+
+Three word pairs choose to create word network, they are "Court and Lawyer", "Children and Parents", and "King and Royal". For creating the word association network, random walk algorithm was used for "Court and Lawyer" pair, and personalised pagerank algorithm was used for the other two pairs, The reason for choosing these specific algorithms were that they were optimal in creating word association network that would generate communities that were relatively coherent compared to others.
+
+For Random Walk it was observed that as the number of walks and size of vertices increases, it increases the size of communities formed later during community detection and hence the number of walks for the one pair is restricted to 40 walks and 160 vertices.
+
+For Personalised Page Rank every time nodes are ranked randomly some nodes are given more weight so that there is a chance for other nodes to be more relevant based on the damping factor, it was found that a high damping factor yields better results on community detection, i.e more communities of ideal size and coherent nodes.
+
+
+\large Section 3.2 [Q1.2]: Analysis of Centrality Measures on the word association networks.
+
+\normalsize
+
+Words of similar contexts seem to be appearing in the subgraph (association networks) created
+using both random walk algorithm and personalised page rank algorithm. The words from the word
+pairs seem to be top words based on centrality and authority measures as they are the root 
+words used to generate the association networks this virtue of the networks makes sense. 
+For example, for the first network generated using words "Court and Lawyers" seems to have
+both court and lawyer appear high on all of the centraility measures. Whereas, for the 
+other two networks the words do appear in the list but they don't seem to have the same level
+of centraility attribute as the first word network. This maybe because, the first network
+was created using random walk whereas the later two where created using personalised page
+rank.
+
+
+\large Section 4 [Q1.3]:Produce a visualisation of the association network 
+
+```{r fig.width= 9, fig.height=5}
+
+#plotting network
+plot_graph(word_association_network1_rand, 10, 30, "COURT", "LAWYER", 1,
+           "Random Walk")
+plot_graph(word_association_network1_page, 10, 30, "COURT", "LAWYER", 2,
+           "Personalised Page Rank")
+
+#plotting network
+plot_graph(word_association_network2_rand, 10, 30, "CHILDREN", "PARENTS", 3,
+           "Random Walk")
+plot_graph(word_association_network2_page, 10, 30, "CHILDREN", "PARENTS", 4,
+           "Personalised Page Rank")
+
+#plotting the graph
+plot_graph(word_association_network3_rand, 10, 30, "KING", "ROYAL", 5,
+           "Random Walk")
+plot_graph(word_association_network3_page, 10, 30, "KING", "ROYAL", 6,
+           "Personalised Page Rank")
+```
+
+
+\huge PART 2
+
+\large Section 5: Detect and display community tables
+
+\normalsize
+
+Q2.1 Using an appropriate community detection algorithm, determine the communities in
+each of the three word association networks you created in Part 1. You are expected to
+evaluate different community detection algorithms and you should justify the one you have
+selected.
+
+Q2.2 Produce a table listing the words in each community. You should do this using a table
+formatting package such as Kable.
+
+```{r}
+
+#creating optimal communities for word association network based on trial and error
+
+cluster1_rand <- cluster_fluid_communities(word_association_network1_rand, no.of.communities = 13)
+
+cluster2_rand <- cluster_walktrap(word_association_network2_rand)
+
+cluster3_rand  <- cluster_walktrap(word_association_network3_rand)
+
+cluster1_page <- cluster_louvain(word_association_network1_page)
+
+cluster2_page <- cluster_label_prop(word_association_network2_page)
+
+cluster3_page  <- cluster_edge_betweenness(word_association_network3_page)
+
+#### UTILITY FUNCTIONS FOR TASK 2
+    # create community table
+
+#create community table with size
+create_community_table <- function(clustering_data){
+  strings <- c()
+  lengths <- c()
+  #loop over each community
+  for(i in 1:length(clustering_data)){
+    #append the clustering data into a string
+    string = ""
+    for(word in clustering_data[[i]]){
+      string = paste0(string, word, " , ")
+    }
+    
+    #store the string and the size
+    strings <- append(strings, string)
+    lengths <- append(lengths, length(clustering_data[[i]]))
+  }
+  #create a tibble
+  df <- tibble(strings, lengths) %>%
+    filter(lengths > 1 ) 
+  colnames(df) <- c("Cluster","Size")
+  
+  #return the tibble
+  return(df)
+}
+
+#create and print the tables for the task
+community_table1_rand <- create_community_table(cluster1_rand)
+
+community_table1_page <- create_community_table(cluster1_page)
+
+community_table2_rand <- create_community_table(cluster2_rand)
+
+community_table2_page <- create_community_table(cluster2_page)
+
+community_table3_rand <- create_community_table(cluster3_rand)
+
+community_table3_page <- create_community_table(cluster3_page)
+
+```
+
+\large Section 5.1 [Q2.1, Q2.2] : 
+
+\normalsize
+
+Various community detection algorithms were simulated on the association networks 
+created on part 1. 
+
+Like the fast-greedy algorithm that joins pairs of granular 
+communities if the move increases the combined community modularity in an iterative
+process. 
+
+Label Propogation algorithm, where every nodes are initally labelled and then iteratively
+each node adopts the label that the maximum number of its neighbors belong to, thus 
+communities are formed in densely connected regions in the graph.
+
+Louvain Alogirthm which follows a bottom-up approach, where initally there are smaller
+set of communities which are converged using agglomerative clustering in two phases
+Identification of communites (based on modularity maximization) and folding of those communities.
+
+Walktrap Algorithm, where the probability of distribution of a random walker reaching other
+nodes in the graph is considered  while deciding whether two nodes should belong to same
+community or not.
+
+Other that these algorithm based in module, fluid communities algorithm[1] was also tried out
+on word pair networks. Idea behind this approach is to think of nodes as fluids interacting in 
+the network. Also, it allows us to identify a arbitary number of communities as a parameter
+to our algorithm. 
+
+After a lot of trial and error it was found that the clustering algorithms set on word pair
+association networks above givee the better results. Modularity of the clustering network
+and context of the communities founds were used to quantify if the community  detections
+results were good.
+
+  
+References:
+
+[1] Parés F, Gasulla DG, et. al. (2018) Fluid Communities: A Competitive, Scalable and Diverse Community Detection Algorithm. In: Complex Networks & Their Applications VI: Proceedings of Complex Networks 2017 (The Sixth International Conference on Complex Networks and Their Applications), Springer, vol 689, p 229, doi: 10.1007/978-3-319-72150-7_19
+
+```{r, results='asis'}
+
+#### UTILITY FUNCTIONS
+# 1. create tibble with community label
+# 2. plot the tibble with community labels
+
+
+# function to create df with communites with label
+define_community_labels <- function(cluster, dataframe){
+  community_label = c()
+  #looping on clusters
+  for (i in 1:length(cluster)){
+    # condition on length of cluster
+    if (length(cluster[[i]]) > 1){
+      #subsetting vertices
+      vertices_in_community <- V(g)[name %in% cluster[[i]]]
+      #create subgraph  
+      community_graph <- induced.subgraph(g, vertices_in_community)
+      #calculating centrality
+      page_rank <- page_rank(community_graph)$vector
+      #higest ranked node as label
+      label = sort(page_rank, decreasing = TRUE)[1]
+      community_label <- c(community_label, label)
+    }
+  }
+  
+  #adding the community label by mutating
+  dataframe<- dataframe %>% 
+    #adding the labels to the dataframe
+    mutate(community_label = names(community_label)) %>%
+    #arranging by order
+    arrange(desc(Size)) %>%
+    # adding the index row
+    mutate(No = 1:nrow(dataframe)) %>%
+    #discarding small clusters
+    filter(Size > 3) %>%
+    #setting order
+    select(No, Cluster, community_label, Size) %>%
+    
+  return(dataframe)
+}
+
+# function to plot dataframe
+plot_table = function(labelled_data, target_word1, target_word2, cluster, type){
+  #plotting table
+  labelled_data %>%
+    #table printing function
+    knitr::kable(
+      format = "latex",
+      align = "l",
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      #printing the modularilty and word pairs
+      caption = paste0("Communities detected for word pair ", target_word1, " and ",
+                       target_word2, " generated from ",type,
+                       " approach","   Modularity ", 
+                       round(modularity(cluster), 2))
+      ) %>%
+    #column spec 6in
+    column_spec(column = 2, width = "6in") %>%
+    kableExtra::kable_paper(
+        position = "left",
+        latex_options = c("striped", "repeat_header, scale_down"),
+        stripe_color = "gray!15"
+  )
+  
+}
+
+#calling functions and plotting tables
+
+clus1_comm_label_rand<-define_community_labels(cluster1_rand, community_table1_rand) 
+plot_table(clus1_comm_label_rand, "Court", "Lawyer", cluster1_rand,
+               "Random Walk")
+
+clus1_comm_label_page<-define_community_labels(cluster1_page, community_table1_page) 
+plot_table(clus1_comm_label_page, "Court", "Lawyer", cluster1_page,
+               "Personalised Page Rank")
+
+clus2_comm_label_rand<-define_community_labels(cluster2_rand, community_table2_rand) 
+plot_table(clus2_comm_label_rand, "Children", "Parent", cluster2_rand,
+               "Random Walk")
+
+clus2_comm_label_page<-define_community_labels(cluster2_page, community_table2_page) 
+plot_table(clus2_comm_label_page, "Children", "Parent", cluster2_page,
+               "Personalised Page Rank")
+
+clus3_comm_label_rand<-define_community_labels(cluster3_rand, community_table3_rand) 
+plot_table(clus3_comm_label_rand, "King", "Royal", cluster3_rand,
+               "Random Walk")
+
+clus3_comm_label_page<-define_community_labels(cluster3_page, community_table3_page) 
+plot_table(clus3_comm_label_page, "King", "Royal", cluster3_page,
+               "Personalised Page Rank")
+
+```
+
+```{r}
+
+plot_table_interpretation = function(interpretation, target_word1, target_word2, type, cluster){
+  interpretation %>%
+    #index order set
+    select(No, Cluster, Interpretation, community_label, Size) %>%
+      #tables print
+      knitr::kable(
+        format = "latex",
+        align = "l",
+        booktabs = TRUE,
+        longtable = TRUE,
+        linesep = "",
+        #printing the modularilty and word pairs
+        caption = paste0("Communities detected for word pair ", target_word1, " and ",
+                         target_word2, " generated from ",type,
+                         " approach","   Modularity ",
+                         round(modularity(cluster), 2))
+        ) %>%
+      # column size define
+      column_spec(column = 2, width = "4in") %>%
+      column_spec(column = 3, width = "2in") %>%
+      column_spec(column = 4, width = "1in") %>%
+      column_spec(column = 5, width = "0.5in") %>%
+      kableExtra::kable_paper(
+          position = "left",
+          latex_options = c("striped", "repeat_header, scale_down"),
+          stripe_color = "gray!15",
+          font_size = 8
+
+    )
+}
+
+# adding interpretation
+interpretation1 <- clus1_comm_label_rand %>%
+  mutate(
+    Interpretation = c(
+      "Terms related to money and law",
+      "Words related to judiciary procesess carried out in court",
+      "Words related to decribe a criminal or a criminal activity",
+      "Attorney and law related terms",
+      "Non-relavent",
+      "Thinsg related to a judiciary process",
+      "Non-relavent",
+      "Physical objects",
+      "A set of lawful and unlawful terms",
+      "Things brought up during a court proceeding",
+      "Non-relevant",
+      "Related to sports",
+      "Non-Relevant"
+    )
+  )
+
+#plotting the community tables with interpretation
+plot_table_interpretation(interpretation1, 
+                          "Court", "Lawyer", "Random Walk", cluster1_rand)
+
+# adding interpretation
+interpretation2 = clus1_comm_label_page %>%
+  mutate(
+    Interpretation = c(
+      "Non-relevant",
+      "Terms related to legal process",
+      "Terms related to court proceedings",
+      "Term related to crime",
+      "Terms related to sport",
+      "Terms related to law and order",
+      "Non-Relevant",
+      "Non-Relevant",
+      "Terms related to intimacy",
+      "Terms related to robbery",
+      "Status of the convict"
+    )
+  )
+
+#plotting the community tables with interpretation
+plot_table_interpretation(interpretation2, "Court", "Lawyer",
+                          "Personalised Page Rank", cluster2_page)
+
+# adding interpretation
+interpretation3 = clus2_comm_label_rand %>%
+  mutate(
+    Interpretation = c(
+      "Non-relevant",
+      "Things related to children and their upbringing",
+      "Things you'd relate to mother",
+      "Things related to education",
+      "Words related to infants",
+      "Characteristics of activities",
+      "Words related to influencing someone",
+      "Characteristics of an object",
+      "Related to laughter",
+      "Related to consent",
+      "Non-Relevant"
+    )
+  )
+
+#plotting the community tables with interpretation
+plot_table_interpretation(interpretation3, "Children", "Parent",
+                          "Random Walk", cluster2_rand)
+# adding interpretation
+interpretation4 = clus2_comm_label_page %>%
+  mutate(
+    Interpretation = c(
+      "Related to kids and parents",
+      "Things you'd relate to grandparents",
+      "None-relevant",
+      "Characteristics of a person",
+      "Actions words",
+      "Related to school",
+      "Related to school ground",
+      "Related to sports",
+      "Non-relevant",
+      "Things associated with sound",
+      "People/objects you'd find in a nursery",
+      "Family relationships",
+      "Related to law"
+    )
+)
+
+#plotting the community tables with interpretation
+plot_table_interpretation(interpretation4, "Children", "Parent",
+                          "Random Walk", cluster2_page)
+
+# adding interpretation
+interpretation5 = clus3_comm_label_rand %>%
+  mutate(
+    Interpretation = c(
+      "Behaviour associated with a king/leader",
+      "Related to economics",
+      "Buildings of worship amongnst religions along with religious leaders",
+      "Non-relevant",
+      "Head of a group/kingdom/country",
+      "Things present in a home",
+      "Related to sport/fight",
+      "Non-relevant",
+      "Words associated with a loyal friend",
+      "Related to food",
+      "Associated with a good looking person",
+      "Associated with poverty"
+    )
+  )
+
+#plotting the community tables with interpretation
+plot_table_interpretation(interpretation5, "Children", "Parent",
+                          "Random Walk", cluster3_rand)
+
+# adding interpretation
+interpretation6 <- clus3_comm_label_page %>%
+  mutate(
+    Interpretation = c(
+      "Non-relevant",
+      "Words associated with a powerful leader",
+      "Related to religion",
+      "Related to abudance/plenty",
+      "Virtues/vices associated with people",
+      "Associated with outdoor activities",
+      "Emotions/Things felt in sadness",
+      "Feminine traits associated with royalty",
+      "Non-relevant",
+      "Related to medieval soldiers",
+      "Non-relevant",
+      "Related to a large mansion",
+      "Types of animals",
+      "Non-relevant",
+      "Related to the sea/fishery",
+      "Related to feminine traits",
+      "Synonyms and Antonyms to royalty"
+    )
+  )
+
+#plotting the community tables with interpretation
+plot_table_interpretation(interpretation6, "Children", "Parent",
+                          "Random Walk", cluster3_page)
+
+```
+
+
+

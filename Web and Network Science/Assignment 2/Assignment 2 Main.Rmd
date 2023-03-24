@@ -15,7 +15,6 @@ header-includes: \usepackage{helvet} \renewcommand\familydefault{\sfdefault}
 
 ```{r setup, include=FALSE, cache = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 #ignore warnings
 options(warn=-1)
 knitr::opts_chunk$set(warning=FALSE, message=FALSE)
@@ -43,17 +42,13 @@ g<- simplify(g)
 
 #reading the cue text file for setting the cue attribute for graph
 cues <- read.table("./cue.txt", header = F, sep="\t", skip=4)
-
 #setting the cue attribute
 V(g)$cue<-cues[[1]]
-
 #checking the diameter value
 print(paste0("Diameter of the network: ", diameter(g, weights = NA)))
-
 ```
 
 ```{r}
-
 check_cue_words <- function(target_node_name1, target_node_name2){
 # test if the selected words are cue words
   
@@ -65,7 +60,6 @@ check_cue_words <- function(target_node_name1, target_node_name2){
     cat(target_node_name2, "cue = ", as.logical(V(g)[target_node_name2]$cue ),"\n")
   }
 }
-
 ```
 
 \large Section 2 [Q1.1]: Create Random Walk and personalised page rank functions
@@ -87,7 +81,6 @@ without bringing in irrelevant contexts.
 #   3. plot tables
 #   4. plotting the graph
 #in this cell
-
 #-----------------------------Q1.1----------------------------------------------
 #random walk function
 random_walk_topic_network <- function(g,target_node_names, steps, walks, mode, topn){
@@ -126,7 +119,6 @@ page_rank_network <- function(g, target_node_names, topn, damping){
   #returning the vertices
   return(top_n_pr)
 }
-
 #-----------------------------Q1.2----------------------------------------------
 #centrailites function for getting top vertices based on centrailites
 centralities = function(word_association_network){
@@ -153,7 +145,6 @@ centralities = function(word_association_network){
                 "Betweeness" = names(betweenness),
                 "Eigen Centrality"= names(eigen_centrality)))
 }
-
 # plot the table dataframe
 plot_table <- function(df, type){
   df %>%
@@ -176,7 +167,6 @@ plot_table <- function(df, type){
         font_size = 8
     )
 }
-
 #-----------------------------Q1.3----------------------------------------------
 #plotting the graph
 plot_graph = function(association_network, vertex_size, label_size, 
@@ -324,20 +314,17 @@ rank.
 
 \large Section 4 [Q1.3]:Produce a visualisation of the association network 
 
-```{r fig.width= 9, fig.height=5}
-
+```{r fig.width= 10, fig.height=5}
 #plotting network
 plot_graph(word_association_network1_rand, 10, 30, "COURT", "LAWYER", 1,
            "Random Walk")
 plot_graph(word_association_network1_page, 10, 30, "COURT", "LAWYER", 2,
            "Personalised Page Rank")
-
 #plotting network
 plot_graph(word_association_network2_rand, 10, 30, "CHILDREN", "PARENTS", 3,
            "Random Walk")
 plot_graph(word_association_network2_page, 10, 30, "CHILDREN", "PARENTS", 4,
            "Personalised Page Rank")
-
 #plotting the graph
 plot_graph(word_association_network3_rand, 10, 30, "KING", "ROYAL", 5,
            "Random Walk")
@@ -359,6 +346,45 @@ selected.
 
 Q2.2 Produce a table listing the words in each community. You should do this using a table
 formatting package such as Kable.
+
+
+\large Section 5.1 [Q2.1, Q2.2] : Creation of community clusters and explainations of the algorithms used.
+
+\normalsize
+
+Various community detection algorithms were simulated on the association networks 
+created on part 1. 
+
+Like the fast-greedy algorithm that joins pairs of granular 
+communities if the move increases the combined community modularity in an iterative
+process. 
+
+Label Propogation algorithm, where every nodes are initally labelled and then iteratively
+each node adopts the label that the maximum number of its neighbors belong to, thus 
+communities are formed in densely connected regions in the graph.
+
+Louvain Alogirthm which follows a bottom-up approach, where initally there are smaller
+set of communities which are converged using agglomerative clustering in two phases
+Identification of communites (based on modularity maximization) and folding of those communities.
+
+Walktrap Algorithm, where the probability of distribution of a random walker reaching other
+nodes in the graph is considered  while deciding whether two nodes should belong to same
+community or not.
+
+Other that these algorithm based in module, fluid communities algorithm[1] was also tried out
+on word pair networks. Idea behind this approach is to think of nodes as fluids interacting in 
+the network. Also, it allows us to identify a arbitary number of communities as a parameter
+to our algorithm. 
+
+After a lot of trial and error it was found that the clustering algorithms set on word pair
+association networks above give the better results. Modularity of the clustering network
+and context of the communities founds were used to quantify if the community  detection
+results were good.
+
+  
+References:
+
+[1] Parés F, Gasulla DG, et. al. (2018) Fluid Communities: A Competitive, Scalable and Diverse Community Detection Algorithm. In: Complex Networks & Their Applications VI: Proceedings of Complex Networks 2017 (The Sixth International Conference on Complex Networks and Their Applications), Springer, vol 689, p 229, doi: 10.1007/978-3-319-72150-7_19
 
 ```{r}
 
@@ -419,43 +445,7 @@ community_table3_page <- create_community_table(cluster3_page)
 
 ```
 
-\large Section 5.1 [Q2.1, Q2.2] : 
-
-\normalsize
-
-Various community detection algorithms were simulated on the association networks 
-created on part 1. 
-
-Like the fast-greedy algorithm that joins pairs of granular 
-communities if the move increases the combined community modularity in an iterative
-process. 
-
-Label Propogation algorithm, where every nodes are initally labelled and then iteratively
-each node adopts the label that the maximum number of its neighbors belong to, thus 
-communities are formed in densely connected regions in the graph.
-
-Louvain Alogirthm which follows a bottom-up approach, where initally there are smaller
-set of communities which are converged using agglomerative clustering in two phases
-Identification of communites (based on modularity maximization) and folding of those communities.
-
-Walktrap Algorithm, where the probability of distribution of a random walker reaching other
-nodes in the graph is considered  while deciding whether two nodes should belong to same
-community or not.
-
-Other that these algorithm based in module, fluid communities algorithm[1] was also tried out
-on word pair networks. Idea behind this approach is to think of nodes as fluids interacting in 
-the network. Also, it allows us to identify a arbitary number of communities as a parameter
-to our algorithm. 
-
-After a lot of trial and error it was found that the clustering algorithms set on word pair
-association networks above givee the better results. Modularity of the clustering network
-and context of the communities founds were used to quantify if the community  detections
-results were good.
-
-  
-References:
-
-[1] Parés F, Gasulla DG, et. al. (2018) Fluid Communities: A Competitive, Scalable and Diverse Community Detection Algorithm. In: Complex Networks & Their Applications VI: Proceedings of Complex Networks 2017 (The Sixth International Conference on Complex Networks and Their Applications), Springer, vol 689, p 229, doi: 10.1007/978-3-319-72150-7_19
+\large Section 5.2 [Q2.3] : Detecting a appropriate label for the communities and printing the table
 
 ```{r, results='asis'}
 
@@ -521,7 +511,8 @@ plot_table = function(labelled_data, target_word1, target_word2, cluster, type){
     kableExtra::kable_paper(
         position = "left",
         latex_options = c("striped", "repeat_header, scale_down"),
-        stripe_color = "gray!15"
+        stripe_color = "gray!15",
+        font_size = 7
   )
   
 }
@@ -554,6 +545,8 @@ plot_table(clus3_comm_label_page, "King", "Royal", cluster3_page,
 
 ```
 
+\large Section 6: Interpretation of the communities found in word association networks
+
 ```{r}
 
 plot_table_interpretation = function(interpretation, target_word1, target_word2, type, cluster){
@@ -582,7 +575,7 @@ plot_table_interpretation = function(interpretation, target_word1, target_word2,
           position = "left",
           latex_options = c("striped", "repeat_header, scale_down"),
           stripe_color = "gray!15",
-          font_size = 8
+          font_size = 7
 
     )
 }
@@ -727,9 +720,18 @@ interpretation6 <- clus3_comm_label_page %>%
 
 #plotting the community tables with interpretation
 plot_table_interpretation(interpretation6, "Children", "Parent",
-                          "Random Walk", cluster3_page)
+                          "Page Rank", cluster3_page)
 
 ```
+
+\large Section 7 : Comparison of Page Rank and Random Walk along with the Conclusion 
+
+Random walk as a process can be described as movement of a point randomly from one vertex to another based on some probability, the probability is related to the weights assigned to the edge. Whereas, in Personalised Page Rank a variant of page rank we add 'bias' to certain nodes (wordpairs in this case) which will be reflected in the chances of visiting the nodes in a network based on the magnitude of the personalised page rank value.
+
+While comparing centralities of networks it is observed that centrailites in word association network created using Personalised Page rank are more coherent compared to random walk. The reason
+might lie in the idea that personalised page rank is more bias on ranking nodes based on user input
+than random walk. This  statement holds true on the communities created using different clustering algorithms as well, During the trial and error phase of community detection process it was observed that communites generated using personalised page rank where optimal relative to the communities generated using random walk.
+
 
 
 

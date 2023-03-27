@@ -1,0 +1,84 @@
+---
+title: "Assignment 2"
+author: "Smitesh Patil"
+date: "2023-03-10"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+geometry: left=1cm,right=1cm,top=2cm,bottom=2cm
+---
+
+```{r}
+
+library(tidyverse)
+library(kableExtra)
+
+
+data <- read_csv("output.csv")
+
+data<- data %>%
+  tibble()
+```
+
+```{r}
+
+data1 <- read.csv("Visualise/Train/run-00_execution0_train-tag-epoch_loss.csv") %>% 
+  select( Value)
+data2 <- read.csv("Visualise/Train/run-01_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data3 <- read.csv("Visualise/Train/run-02_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data4 <- read.csv("Visualise/Train/run-03_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data5 <- read.csv("Visualise/Train/run-04_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data6 <- read.csv("Visualise/Train/run-05_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data7 <- read.csv("Visualise/Train/run-06_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data8 <- read.csv("Visualise/Train/run-07_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data9 <- read.csv("Visualise/Train/run-08_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data10 <- read.csv("Visualise/Train/run-09_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data11 <- read.csv("Visualise/Train/run-10_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data12 <- read.csv("Visualise/Train/run-11_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data13 <- read.csv("Visualise/Train/run-12_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data14 <- read.csv("Visualise/Train/run-13_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data15 <- read.csv("Visualise/Train/run-14_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data16 <- read.csv("Visualise/Train/run-15_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data17 <- read.csv("Visualise/Train/run-16_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data18 <- read.csv("Visualise/Train/run-17_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data19 <- read.csv("Visualise/Train/run-18_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+data20 <- read.csv("Visualise/Train/run-19_execution0_train-tag-epoch_loss.csv") %>% 
+  select(Value)
+
+
+train_loss = tibble(model_1 = data1, model_2 = data2, model_3 = data3, model_4 = data4,
+       model_5 = data5, model_6 = data6, model_7 = data7, model_8 = data8,
+       model_9 = data9, model_10 = data10, model_11 = data11,
+       model_12 = data12, model_13 = data14, model_15 = data15, model_16 = data16,
+       model_17 = data17, model_18 = data18, model_19 = data19, model_20 = data20)
+
+
+library(tidyr)
+train_loss <- pivot_longer(train_loss, 1:19, names_to = "Models", values_to = "Loss Val") %>%
+      mutate(idx = as.numeric(str_extract(Models, "[0-9]+")))
+
+
+  
+train_loss %>%
+  ggplot(aes(x = idx, y = `Loss Val`$Value, group = Models))+
+  geom_line()
+```

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.3.6)  23 MAR 2023 23:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.3.6)  24 MAR 2023 19:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -468,9 +468,6 @@ LaTeX Warning: Unused global option(s):
 
 (./Assignment-2-Main.aux
 
-LaTeX Warning: Label `tab:unnamed-chunk-4' multiply defined.
-
-
 LaTeX Warning: Label `tab:unnamed-chunk-7' multiply defined.
 
 
@@ -608,62 +605,102 @@ LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <12> not available
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 202.
 [2]
-Underfull \vbox (badness 10000) detected at line 330
+Underfull \vbox (badness 10000) detected at line 337
  []
 
 
-Underfull \vbox (badness 10000) detected at line 330
+Underfull \vbox (badness 10000) detected at line 337
  []
 
 [3] [4] [5]
-Overfull \hbox (3.30197pt too wide) in alignment at lines 431--438
+Overfull \hbox (3.30197pt too wide) in alignment at lines 439--446
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 LaTeX Font Info:    Font shape `T1/phv/m/it' in size <8> not available
-(Font)              Font shape `T1/phv/m/sl' tried instead on input line 439.
+(Font)              Font shape `T1/phv/m/sl' tried instead on input line 447.
 
-Overfull \hbox (3.30197pt too wide) in alignment at lines 438--445
+Overfull \hbox (3.30197pt too wide) in alignment at lines 446--453
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (3.30197pt too wide) in alignment at lines 445--447
+Overfull \hbox (3.30197pt too wide) in alignment at lines 453--455
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (3.30197pt too wide) in alignment at lines 447--449
+Overfull \hbox (3.30197pt too wide) in alignment at lines 455--457
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (3.30197pt too wide) in alignment at lines 449--455
+Overfull \hbox (3.30197pt too wide) in alignment at lines 457--458
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.97398pt too wide) in alignment at lines 466--473
+Overfull \hbox (3.30197pt too wide) in alignment at lines 458--465
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.97398pt too wide) in alignment at lines 473--480
+Overfull \hbox (3.30197pt too wide) in alignment at lines 465--467
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.97398pt too wide) in alignment at lines 480--482
+Overfull \hbox (3.30197pt too wide) in alignment at lines 467--468
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.97398pt too wide) in alignment at lines 482--484
+Overfull \hbox (3.30197pt too wide) in alignment at lines 468--474
  [] [] [] [] [] [] [] [] [] [] 
  []
 
 
-Overfull \hbox (0.97398pt too wide) in alignment at lines 484--490
+Overfull \hbox (0.97398pt too wide) in alignment at lines 487--494
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 494--501
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 501--503
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 503--505
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 505--506
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 506--513
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 513--515
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 515--516
+ [] [] [] [] [] [] [] [] [] [] 
+ []
+
+
+Overfull \hbox (0.97398pt too wide) in alignment at lines 516--522
  [] [] [] [] [] [] [] [] [] [] 
  []
 
@@ -671,76 +708,76 @@ Overfull \hbox (0.97398pt too wide) in alignment at lines 484--490
 <Assignment-2-Main_files/figure-latex/unnamed-chunk-5-1.pdf, id=36, 722.7pt x 361.35pt>
 File: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-1.pdf Graphic file (type pdf)
 <use Assignment-2-Main_files/figure-latex/unnamed-chunk-5-1.pdf>
-Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-1.pdf  used on input line 546.
+Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-1.pdf  used on input line 579.
 (pdftex.def)             Requested size: 557.396pt x 278.698pt.
 <Assignment-2-Main_files/figure-latex/unnamed-chunk-5-2.pdf, id=37, 722.7pt x 361.35pt>
 File: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-2.pdf Graphic file (type pdf)
 <use Assignment-2-Main_files/figure-latex/unnamed-chunk-5-2.pdf>
-Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-2.pdf  used on input line 555.
+Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-2.pdf  used on input line 588.
 (pdftex.def)             Requested size: 557.396pt x 278.698pt.
 [7 <./Assignment-2-Main_files/figure-latex/unnamed-chunk-5-1.pdf>]
 <Assignment-2-Main_files/figure-latex/unnamed-chunk-5-3.pdf, id=54, 722.7pt x 361.35pt>
 File: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-3.pdf Graphic file (type pdf)
 <use Assignment-2-Main_files/figure-latex/unnamed-chunk-5-3.pdf>
-Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-3.pdf  used on input line 565.
+Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-3.pdf  used on input line 598.
 (pdftex.def)             Requested size: 557.396pt x 278.698pt.
 <Assignment-2-Main_files/figure-latex/unnamed-chunk-5-4.pdf, id=55, 722.7pt x 361.35pt>
 File: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-4.pdf Graphic file (type pdf)
 <use Assignment-2-Main_files/figure-latex/unnamed-chunk-5-4.pdf>
-Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-4.pdf  used on input line 574.
+Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-4.pdf  used on input line 607.
 (pdftex.def)             Requested size: 557.396pt x 278.698pt.
 [8 <./Assignment-2-Main_files/figure-latex/unnamed-chunk-5-2.pdf> <./Assignment-2-Main_files/figure-latex/unnamed-chunk-5-3.pdf>]
 <Assignment-2-Main_files/figure-latex/unnamed-chunk-5-5.pdf, id=80, 722.7pt x 361.35pt>
 File: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-5.pdf Graphic file (type pdf)
 <use Assignment-2-Main_files/figure-latex/unnamed-chunk-5-5.pdf>
-Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-5.pdf  used on input line 584.
+Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-5.pdf  used on input line 617.
 (pdftex.def)             Requested size: 557.396pt x 278.698pt.
 <Assignment-2-Main_files/figure-latex/unnamed-chunk-5-6.pdf, id=81, 722.7pt x 361.35pt>
 File: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-6.pdf Graphic file (type pdf)
 <use Assignment-2-Main_files/figure-latex/unnamed-chunk-5-6.pdf>
-Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-6.pdf  used on input line 593.
+Package pdftex.def Info: Assignment-2-Main_files/figure-latex/unnamed-chunk-5-6.pdf  used on input line 626.
 (pdftex.def)             Requested size: 557.396pt x 278.698pt.
 [9 <./Assignment-2-Main_files/figure-latex/unnamed-chunk-5-4.pdf> <./Assignment-2-Main_files/figure-latex/unnamed-chunk-5-5.pdf>] [10 <./Assignment-2-Main_files/figure-latex/unnamed-chunk-5-6.pdf>]
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 672.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 705.
 
 [11]
 
 LaTeX Font Warning: Font shape `T1/lmtt/bx/it' in size <12> not available
-(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 720.
+(Font)              Font shape `T1/lmtt/b/sl' tried instead on input line 753.
 
 [12] [13] [14] [15]
-Overfull \hbox (53.58138pt too wide) in alignment at lines 1043--1062
+Overfull \hbox (53.58138pt too wide) in alignment at lines 1076--1095
 [] [] [] [] [] 
  []
 
 [16]
-Overfull \hbox (53.58138pt too wide) in alignment at lines 1093--1110
+Overfull \hbox (53.58138pt too wide) in alignment at lines 1126--1143
 [] [] [] [] [] 
  []
 
 [17]
-LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 1121.
+LaTeX Font Info:    Trying to load font information for TS1+lmtt on input line 1154.
 (c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-Overfull \hbox (53.58138pt too wide) in alignment at lines 1141--1158
+Overfull \hbox (53.58138pt too wide) in alignment at lines 1174--1191
 [] [] [] [] [] 
  []
 
 [18]
-Overfull \hbox (53.58138pt too wide) in alignment at lines 1191--1210
+Overfull \hbox (53.58138pt too wide) in alignment at lines 1224--1243
 [] [] [] [] [] 
  []
 
 [19]
-Overfull \hbox (53.58138pt too wide) in alignment at lines 1242--1260
+Overfull \hbox (53.58138pt too wide) in alignment at lines 1275--1293
 [] [] [] [] [] 
  []
 
 [20]
-Overfull \hbox (53.58138pt too wide) in alignment at lines 1297--1320
+Overfull \hbox (53.58138pt too wide) in alignment at lines 1330--1353
 [] [] [] [] [] 
  []
 
@@ -752,18 +789,18 @@ Package rerunfilecheck Info: File `Assignment-2-Main.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 12926 strings out of 477984
- 208971 string characters out of 5837578
+ 12925 strings out of 477984
+ 208950 string characters out of 5837578
  1888382 words of memory out of 5000000
- 32829 multiletter control sequences out of 15000+600000
+ 32828 multiletter control sequences out of 15000+600000
  549639 words of font info for 72 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,7n,76p,477b,555s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,7n,76p,545b,555s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}<c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtk10.pfb><c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtko10.pfb><c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb><c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt12.pfb><c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtti10.pfb><c:/Users/Smitesh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb>
-Output written on Assignment-2-Main.pdf (21 pages, 1392124 bytes).
+Output written on Assignment-2-Main.pdf (21 pages, 1246746 bytes).
 PDF statistics:
- 222 PDF objects out of 1000 (max. 8388607)
- 172 compressed objects within 2 object streams
+ 221 PDF objects out of 1000 (max. 8388607)
+ 171 compressed objects within 2 object streams
  36 named destinations out of 1000 (max. 500000)
  31 words of extra memory for PDF output out of 10000 (max. 10000000)
 

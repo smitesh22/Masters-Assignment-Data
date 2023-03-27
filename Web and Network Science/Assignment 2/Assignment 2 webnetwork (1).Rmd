@@ -1,0 +1,557 @@
+---
+title: "Assignment 2 WebnNetwork_22225777"
+author: "Nilay Udeshi"
+date: "2023-03-23"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Setting the random seed to 101 for uniformity.
+```{r}
+set.seed(101)
+options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+```{r}
+#Loading required libraries
+set.seed(101)
+library(igraph)
+
+
+g<- read_graph(file="WordPairs.txt",format="pajek")
+
+
+# the graph should be undirected
+g<- as.undirected(g)
+
+# Simple graphs are graphs which do not contain loop and multiple edges.
+g<-simplify(g)
+
+# read the cue.txt file into R
+# skip first 4 lines which are header lines
+cues <- read.table("./cue.txt", header = F, sep="\t", skip=4)
+
+# add a cue value as vertex attribute
+# each cue value is 0 or 1
+V(g)$cue<-cues[[1]]
+
+# The cue words are much better represented in the dataset
+# In other words they have high degree - many nodes
+# connect to them
+deg<-degree(g)
+
+cat("mean degree of cue words", mean(deg[which(V(g)$cue==1)]))
+```
+##Part 1.1
+```{r}
+#Creating a function Random Walk which takes in 6 arguments: graph, seed node names, steps, walks, mode and topn.
+steps = 7
+walks <-100
+
+rand_walk_topic_network <- function(g, seed_node_names, steps, walks, mode, topn) {
+  
+  # Run the random walk multiple times starting from the seed node
+  visited<-c()
+  #These lines do a random walk starting from the seed nodes (seed node names) for the specified number of steps during each iteration of the walk number loop.
+for(i in 1:walks){
+  walk_random <- random_walk(g,seed_node_names, steps, stuck = "return")
+  visited<-c(visited,walk_random)
+}
+  
+  # Extract the top n most frequently visited nodes in the subgraph
+  freq_table <- table(names(visited))
+  top_nodes <- names(sort(freq_table, decreasing = TRUE)[1:topn])
+  top_nodes <- V(g)[top_nodes]
+  subgraph <- induced.subgraph(g, top_nodes)
+  
+  # Return the subgraph
+  return(subgraph)
+}
+
+```
+
+
+```{r}
+#Taking 2 random words from the dataset and checking if they are cue words.
+target_node_name1 <- "CRAFT"
+target_node_name2 <- "ARTS"
+
+
+# test if the selected words are cue words
+
+if(V(g)[target_node_name1]$cue & V(g)[target_node_name2]$cue){
+  cat("Both target words are cue words \n")
+}else{
+  cat("Both target words are NOT cue words \n")
+  cat(target_node_name1, "cue = ", as.logical(V(g)[target_node_name1]$cue ),"\n")
+  cat(target_node_name2, "cue = ", as.logical(V(g)[target_node_name2]$cue ),"\n")
+  
+}
+```
+
+```{r}
+#Taking 2 random words and checking if the two selected words are cue words.
+target_node_name3 <- "COP"
+target_node_name4<- "HANDCUFFS"
+
+
+# test if the selected words are cue words
+
+if(V(g)[target_node_name3]$cue & V(g)[target_node_name4]$cue){
+  cat("Both target words are cue words \n")
+}else{
+  cat("Both target words are NOT cue words \n")
+  cat(target_node_name3, "cue = ", as.logical(V(g)[target_node_name3]$cue ),"\n")
+  cat(target_node_name4, "cue = ", as.logical(V(g)[target_node_name4]$cue ),"\n")
+  
+}
+```
+
+```{r}
+#Taking 2 random words and checking if the two selected words are cue words.
+
+target_node_name5 <- "COURT"
+target_node_name6<- "LAWYER"
+
+
+# test if the selected words are cue words
+
+if(V(g)[target_node_name5]$cue & V(g)[target_node_name6]$cue){
+  cat("Both target words are cue words \n")
+}else{
+  cat("Both target words are NOT cue words \n")
+  cat(target_node_name5, "cue = ", as.logical(V(g)[target_node_name5]$cue ),"\n")
+  cat(target_node_name6, "cue = ", as.logical(V(g)[target_node_name6]$cue ),"\n")
+  
+}
+```
+
+```{r}
+#Appending the set of cue words into the 3 variables and then psssing these into the random walk function.
+seed_node <- c(target_node_name1,target_node_name2)
+seed_node_two <- c(target_node_name3,target_node_name4)
+seed_node_three <- c(target_node_name5,target_node_name6)
+
+first_subgraph <- rand_walk_topic_network(g,seed_node,steps,walk=150,mode="all",topn=150)
+second_subgraph <- rand_walk_topic_network(g,seed_node_two,steps,walk=150,mode="all",topn=150)
+third_subgraph <- rand_walk_topic_network(g,seed_node_three,steps,walk=150,mode="all",topn=150)
+
+```
+
+##Part 1.2
+#First pair centrality["CRAFT","ARTS"]
+```{r}
+#Eigen centrality
+# calculates the eigenvalue centrality scores for nodes in the first_subgraph using the eigen_centrality function from the igraph package. 
+
+eigen1<- eigen_centrality(first_subgraph, weights=NA)$vector
+sort_one <- sort(eigen1,decreasing = TRUE)
+names_eigen <- c()
+for (i in 1:5){
+  names_eigen <- c(names_eigen, names(sort_one)[i])
+  }
+
+#Authority centrality
+#calculates the authority scores for nodes in the first_subgraph using the authority_score function from the igraph package. 
+
+authority<- authority_score(first_subgraph, scale = TRUE)$vector
+sort_two <- sort(authority,decreasing = TRUE)
+names_authority <- c()
+for (i in 1:5){
+  names_authority<- c(names_authority, names(sort_two)[i])
+  }
+
+#Kleinbergs hub score
+#calculates the hub scores for nodes in the first_subgraph using the hub_score function from the igraph package. 
+hub<- hub_score( first_subgraph, scale = TRUE)$vector
+sort_three <- sort(hub,decreasing = TRUE)
+names_hub <- c()
+for (i in 1:5){
+  names_hub <- c(names_hub, names(sort_three)[i])
+  }
+#Creating a dataframe and appending all the obtained values into the dataframe.
+df <- data.frame(eigen = names_eigen,Authority=names_authority, Kleinbergs_Hub_score = names_hub)
+df
+```
+Here in the first case, we get the same results for Authority and Kleinberg's hub score but different for Eigen value(here CRAFT being different from BOAT).It might be because this node might be more important in terms of its direct and indirect connections to other nodes.Based on a node's connections to other nodes, including indirect connections made through intermediary nodes, Eigen centrality calculates a node's significance. As a result, a node with a higher eigen centrality score has connections to other nodes in the network that are more significant.Since the eigen centrality score differs from the hub and authority values, it is possible that a node may have a higher impact on the network through its direct connections than through its influence on other significant nodes.
+
+
+
+#Second pair centrality["COP","HANDCUFFS"]
+
+```{r}
+#Eigen centrality
+# calculates the eigenvalue centrality scores for nodes in the first_subgraph using the eigen_centrality function from the igraph package. 
+
+eigen2<- eigen_centrality(second_subgraph, weights=NA)$vector
+sort_two <- sort(eigen2,decreasing = TRUE)
+names_eigen_2 <- c()
+for (i in 1:5){
+  names_eigen_2 <- c(names_eigen_2, names(sort_two)[i])
+  }
+
+#Authority centrality
+#calculates the authority scores for nodes in the first_subgraph using the authority_score function from the igraph package. 
+
+authority_2<- authority_score(second_subgraph, scale = TRUE)$vector
+sort_p2_two <- sort(authority_2,decreasing = TRUE)
+names_authority_2 <- c()
+for (i in 1:5){
+  names_authority_2<- c(names_authority_2, names(sort_p2_two)[i])
+  }
+
+#Kleinbergs hub score
+#calculates the hub scores for nodes in the first_subgraph using the hub_score function from the igraph package. 
+
+hub<- hub_score( second_subgraph, scale = TRUE)$vector
+sort_p2_three <- sort(hub,decreasing = TRUE)
+names_hub_2 <- c()
+for (i in 1:5){
+  names_hub_2 <- c(names_hub_2, names(sort_p2_three)[i])
+  }
+
+#Creating a dataframe and appending all the obtained values into the dataframe.
+df2 <- data.frame(eigen = names_eigen_2,Authority=names_authority_2, Kleinbergs_Hub_Score =names_hub_2)
+df2
+```
+Here in the second case similarly, we get the same results for Authority and Kleinberg's hub score but different for Eigen value(here COP being different from POLICE).It might be because this node might be more important in terms of its direct and indirect connections to other nodes.Based on a node's connections to other nodes, including indirect connections made through intermediary nodes, Eigen centrality calculates a node's significance. As a result, a node with a higher eigen centrality score has connections to other nodes in the network that are more significant.Since the eigen centrality score differs from the hub and authority values, it is possible that a node may have a higher impact on the network through its direct connections than through its influence on other significant nodes.
+
+
+#Third Pair Centrality ["COURT","LAWYER"]
+```{r}
+
+#Eigen Centrality
+#calculates the eigenvalue centrality scores for nodes in the first_subgraph using the eigen_centrality function from the igraph package. 
+
+eigen3<- eigen_centrality(third_subgraph, weights=NA)$vector
+sort_three <- sort(eigen3,decreasing = TRUE)
+names_eigen_3 <- c()
+for (i in 1:5){
+  names_eigen_3 <- c(names_eigen_3, names(sort_three)[i])
+  }
+
+#Authority centrality
+#calculates the authority scores for nodes in the first_subgraph using the authority_score function from the igraph package. 
+
+authority_3<- authority_score(third_subgraph, scale = TRUE)$vector
+sort_p2_three <- sort(authority_3,decreasing = TRUE)
+names_authority_3 <- c()
+for (i in 1:5){
+  names_authority_3<- c(names_authority_3, names(sort_p2_three)[i])
+  }
+
+#Kleinbergs hub score
+#calculates the hub scores for nodes in the first_subgraph using the hub_score function from the igraph package. 
+
+hub<- hub_score( third_subgraph, scale = TRUE)$vector
+sort_p2_four <- sort(hub,decreasing = TRUE)
+names_hub_f <- c()
+for (i in 1:5){
+  names_hub_f <- c(names_hub_f, names(sort_p2_four)[i])
+}
+
+#Creating a dataframe and appending all the obtained values into the dataframe.
+df3 <- data.frame(eigen = names_eigen_3,Authority=names_authority_3, Kleinbergs_Hub_Score =names_hub_f)
+df3
+```
+Here in the third case similarly, we get the same results for Authority and Kleinberg's hub score but different for Eigen value(here COURT being different from BAD).It might be because this node might be more important in terms of its direct and indirect connections to other nodes.Based on a node's connections to other nodes, including indirect connections made through intermediary nodes, Eigen centrality calculates a node's significance. As a result, a node with a higher eigen centrality score has connections to other nodes in the network that are more significant.Since the eigen centrality score differs from the hub and authority values, it is possible that a node may have a higher impact on the network through its direct connections than through its influence on other significant nodes.
+
+##Part 1.3
+##Visualization for Subgraph 1
+```{r}
+library(ggrepel)
+library(ggraph)
+
+# values set by trial and error
+vertex_size <- 2.5 + degree(first_subgraph)/1.5
+cex_size <-2 + degree(first_subgraph)/12
+
+  ggraph(first_subgraph, layout = "fr") +
+    
+     geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+    geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = "#188ac1") +
+
+    geom_node_text(
+      aes(label = name),
+      size = cex_size,
+      fontface = "bold",
+      repel = TRUE
+    ) +theme(legend.position = "none",
+          panel.background = element_rect(fill = "white"))
+  
+```
+##Visualization for Subgraph 2
+```{r}
+vertex_size <- 2.5 + degree(second_subgraph)/1.5
+cex_size <-2 + degree(second_subgraph)/12
+
+  ggraph(second_subgraph, layout = "fr") +
+    
+     geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+    geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = "#188ac1") +
+
+    geom_node_text(
+      aes(label = name),
+      size = cex_size,
+      fontface = "bold",
+      repel = TRUE
+    ) +
+   
+    theme(legend.position = "none",
+          panel.background = element_rect(fill = "white"))
+```
+
+##Visualization for Subgraph 3
+```{r}
+vertex_size <- 2.5 + degree(third_subgraph)/1.5
+cex_size <-2 + degree(third_subgraph)/12
+
+  ggraph(third_subgraph, layout = "fr") +
+    
+     geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+    geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = "#188ac1") +
+
+    geom_node_text(
+      aes(label = name),
+      size = cex_size,
+      fontface = "bold",
+      repel = TRUE
+    ) +
+   
+    theme(legend.position = "none",
+          panel.background = element_rect(fill = "white"))
+```
+
+
+##Part 2.1
+#Modularity alorithms for Subgraph 1
+```{r}
+#Fast greedy modularity maximisation for First subgraph
+Greedy_s1<- cluster_fast_greedy(first_subgraph)
+# the max modularity found by the algorithm
+mod_max<- modularity(Greedy_s1)
+paste0("Modularity for Fast Greedy Algorithm for Subgraph 1:",mod_max)
+
+#Louvian Algorithm for First subgraph
+Louv_s1<- cluster_louvain(first_subgraph)
+# maximum modularity found
+mod_max_louv <- modularity(Louv_s1)
+paste0("Modularity for Louvian Algorithm for Subgraph 1 :",mod_max_louv)
+
+
+#Walktrap Algorithm
+Walktrap_s1<- cluster_walktrap(first_subgraph)
+# the max modularity
+mod_max_walk<-modularity(Walktrap_s1)
+paste0("Modularity for Walktrap Algorithm for Subgraph 1 :",mod_max_walk)
+
+
+
+```
+After comparing all the modularity values of Fast Greedy Algorithm, Louvian Algorithm, and Walktrap Algorithm , we get the highest modularity for Louvian Algorithm(0.7559) for our set 1 as this method moves nodes between communities greedily on each iteration in an effort to maximize modularity up until there is no more room for improvement. To find the community structure with the highest modularity, this process is repeated over a number of rounds.While the Louvain Algorithm is primarily created to optimize modularity through its iterative optimization process, the Fast Greedy Algorithm and Walktrap Algorithm can also find communities in networks. Nevertheless, they may not necessarily generate the highest modularity.
+
+
+#Modularity alorithms for Subgraph 2
+```{r}
+#Fast greedy modularity maximisation for second subgraph
+Greedy_s2<- cluster_fast_greedy(second_subgraph)
+# the max modularity found by the algorithm
+mod_max_2<- modularity(Greedy_s2)
+paste0("Modularity for Fast Greedy Algorithm for Subgraph 2:",mod_max_2)
+
+#Louvian Algorithm for Second subgraph
+Louv_s2<- cluster_louvain(second_subgraph)
+# maximum modularity found
+mod_max_louv_2 <- modularity(Louv_s2)
+paste0("Modularity for Louvian Algorithm for Subgraph 2:",mod_max_louv_2)
+
+
+#Walktrap Algorithm
+Walktrap_s2<- cluster_walktrap(second_subgraph)
+# the max modularity
+mod_max_walk_2<-modularity(Walktrap_s2)
+paste0("Modularity for Walktrap Algorithm for Subgraph 2 :",mod_max_walk_2)
+
+
+```
+After comparing all the modularity values of Fast Greedy Algorithm, Louvian Algorithm, and Walktrap Algorithm , we get the highest modularity for Louvian Algorithm(0.6049) for our set 1 as this method moves nodes between communities greedily on each iteration in an effort to maximize modularity up until there is no more room for improvement. To find the community structure with the highest modularity, this process is repeated over a number of rounds.While the Louvain Algorithm is primarily created to optimize modularity through its iterative optimization process, the Fast Greedy Algorithm and Walktrap Algorithm can also find communities in networks. Nevertheless, they may not necessarily generate the highest modularity.
+
+#Modularity alorithms for Subgraph 3
+```{r}
+#Fast greedy modularity maximisation for third subgraph
+Greedy_s3<- cluster_fast_greedy(third_subgraph)
+# the max modularity found by the algorithm
+mod_max_3<- modularity(Greedy_s3)
+paste0("Modularity for Fast Greedy Algorithm for Subgraph 3 :",mod_max_3)
+
+#Louvian Algorithm for Second subgraph
+Louv_s3<- cluster_louvain(third_subgraph)
+# maximum modularity found
+mod_max_louv_3 <- modularity(Louv_s3)
+paste0("Modularity for Louvian Algorithm for Subgraph 3:",mod_max_louv_3)
+
+
+#Walktrap Algorithm
+Walktrap_s3<- cluster_walktrap(third_subgraph)
+# the max modularity
+mod_max_walk_3<-modularity(Walktrap_s3)
+paste0("Modularity for Walktrap Algorithm for Subgraph 3:",mod_max_walk_3)
+
+```
+After comparing all the modularity values of Fast Greedy Algorithm, Louvian Algorithm, and Walktrap Algorithm , we get the highest modularity for Fast Greedy Algorithm(0.6455) for our set 1 as Its method of iteratively combining communities based on the highest improvement in modularity enables it to rapidly locate communities in huge networks without the need for laborious computations. It is a good choice for community discovery in very large networks due to its efficiency.
+
+```{r}
+cat("mean degree of NON-cue words", mean(deg[which(V(g)$cue==0)]))
+
+```
+##Part 2.2 and 2.3
+#for sub graph1
+```{r}
+library(kableExtra)
+
+mod_max<-cluster_fast_greedy(first_subgraph)
+community_result <- mod_max
+
+community_1_df <- data.frame(number = character(), size = numeric(), cluster = character(),label=character())
+
+# Iterate through communities and extract size and name
+
+  for (i in seq_along(community_result)){
+    node <- community_result[[i]]
+    subgraph <- induced_subgraph(first_subgraph,node)
+    pagerank_score <- page_rank(subgraph)$vector
+    label_node_3 <- names(which.max(pagerank_score))
+    words <- unlist(community_result[[i]])
+  community_1_df[i, 'size'] <- length(community_result[[i]])
+  community_1_df[i, 'cluster'] <- sort(paste(words,collapse=", "),decreasing = TRUE)
+  community_1_df['number']<-1:length(rownames(community_1_df))
+  community_1_df[i,'label']<-label_node_3
+}
+
+community_1_df %>%
+  kable("html", align = "c", row.names = FALSE) %>%
+  kable_styling("striped", full_width = FALSE) %>%
+  column_spec(1:ncol(community_1_df), bold = TRUE) %>%
+  collapse_rows(columns = 1, valign = "middle")
+```
+
+#for sub graph2
+```{r}
+#This code initializes an empty data frame called community_2_df with four columns named 'number', 'size', 'cluster', and 'label'
+mod_max_2<-cluster_fast_greedy(second_subgraph)
+community_result_2 <- mod_max_2
+
+community_2_df <- data.frame(number = character(), size = numeric(), cluster = character(),label=character())
+
+# Iterate through communities and extract size and name
+
+  for (i in seq_along(community_result_2)){
+    node <- community_result_2[[i]]
+    subgraph <- induced_subgraph(second_subgraph,node)
+    pagerank_score <- page_rank(subgraph)$vector
+    label_node_2 <- names(which.max(pagerank_score))
+    words <- unlist(community_result_2[[i]])
+  community_2_df[i, 'size'] <- length(community_result_2[[i]])
+  community_2_df[i, 'cluster'] <- sort(paste(words,collapse=", "),decreasing = TRUE)
+  community_2_df['number']<-1:length(rownames(community_2_df))
+  community_2_df[i,'label'] <- label_node_2
+
+}
+#This code is using the kable() and kable_styling() functions from the knitr package to create a formatted HTML table.
+
+community_2_df %>%
+  kable("html", align = "c", row.names = FALSE) %>%
+  kable_styling("striped", full_width = FALSE) %>%
+  column_spec(1:ncol(community_2_df), bold = TRUE) %>%
+  collapse_rows(columns = 1, valign = "middle")
+```
+#for sub graph3.
+```{r}
+
+mod_max_3<-cluster_fast_greedy(third_subgraph)
+community_result_3 <- mod_max_3
+
+community_3_df <- data.frame(number = character(), size = numeric(), cluster = character(),label=character())
+
+# Iterate through communities and extract size and name
+ 
+  for (i in seq_along(community_result_3)){
+    node <- community_result_3[[i]]
+    subgraph <- induced_subgraph(third_subgraph,node)
+    pagerank_score <- page_rank(subgraph)$vector
+    label_node_1 <- names(which.max(pagerank_score))
+    words <- unlist(community_result_3[[i]])
+  community_3_df[i, 'size'] <- length(community_result_3[[i]])
+  community_3_df[i, 'cluster'] <- sort(paste(words,collapse=", "),decreasing = TRUE)
+  community_3_df['number']<-1:length(rownames(community_3_df))
+  community_3_df[i,'label'] <- label_node_1
+}
+
+#knitr::kable(community_3_df,align="c")
+library(kableExtra)
+
+community_3_df %>%
+  kable("html", align = "c", row.names = FALSE) %>%
+  kable_styling("striped", full_width = FALSE) %>%
+  column_spec(1:ncol(community_3_df), bold = TRUE) %>%
+  collapse_rows(columns = 1, valign = "middle")
+
+```
+
+##Part 2.4
+
+->1. For Sub-graph 1 :
+
+a.SKILL, ART, TEST, PAINT, CANVAS, COLOR, CRAFT, CREATIVE, CRAFTS, TASK, GLUE, FLOWERS, CLAY, POTTERY, CONSTRUCTIVE, PROJECT, DISPROVE, DISAPPROVED, STRIP, POEM all contribute towards the main topic of ART as by these all things one can estimate that the other person is talking about some type of ART.
+
+b.FOOD, NUT, ROLL, CAKE, HAM, SACK, GROCERIES, CHEESE, BAKED, FRIED, HAMBURGER, CATTLE, ONION, SALAD, NOODLES, MACARONI, PASTA, TWINE all are food items and are broadly linked to FOOD.
+
+c.ABOVE, HIGH, SKY, FLY, AIR, MODEL, TRAVEL, PLANE, AIRPLANE, GROUND, PAVEMENT, TAR, FIVE, KITE, HOSTESS are linked to FLY as these are all the things usually seen in an plane or an airport or are linked to flying in a way.
+
+d. GOOD, FEELING, APPEARANCE, FACE, LUCK, DILIGENCE, LUCKY	 all are linked to GOOD which in general give a happy vibe.
+
+
+->2.For Sub-graph 2:
+
+a.POLICE, AUTHORITY, OFFICER, SIREN, PIG, ARREST, COP, HANDCUFFS, DAD, GOLD, BADGE, SHERIFF, DOUGHNUT, BORDER, PATROL, BUST, DEPUTY, OFFICIAL, POLICEMAN, FRISK, FUZZ, BRACELETS, SQUAD all these words refer to the police or all the items a police uses. Using any one of these words gives us a basic idea of the label they are linked to ie. POLICE.
+
+b.UP, ACCELERATE, SPEED, CAR, ACCIDENT, TICKET, EMERGENCY, DIRT, UNCONSCIOUS, HIGHWAY, TRAFFIC, MESS, SKATE, LICENSE, URGENT, VIOLATION are all the things related to cars like accident, tickets for parking,  highways where cars drive, traffic and licesnce for driving a CAR.
+
+c.PERSON, NAME, FRIEND, AGENT, FBI, SECRET, SPY, DETECTIVE, SUE, CLUE, KGB, MAYOR	are all linked to AGENT as it the first word that comes to our mind when someone says FBI, Spy, Detective . Hence the word AGENT describes the community well.
+
+d.STEAL, ALARM, THIEF, BANDIT, OUTLAW, BURGLAR, CROOKED are all the words that one gets when they think about a THIEF.
+
+
+->For sub-graph 3:
+
+a.COURT, JUDGE, TRIAL, TENNIS, BASKETBALL, ADJOURN, END, OPINION, FLING, DAY, CENTER, DATE, CASE, PLEA, JUSTICE, WITNESS, EVIDENCE, SENTENCE, PEOPLE'S, JURY, JUDGMENT, TESTIMONY, GAVEL, VERDICT, OATH, TESTIFY are all the words in the community that point towards the label COURT . In this case COURT is also linked to a Basketball court , a tennis court that is where one can play sports but a court is also where a judge gives his judgements.
+->So all these words that are linked to the word COURT come under one community and can be represented by the label COURT.
+
+b.HIGH, NUMBER, PEAK, SUMMIT, PERCENT	are under the label PEAK as peak refers to a mountain's peak as well as a percentage peak.
+
+c.GOOD, FOOD, BAD, AD, NEWS, HONEST, NICE, SINCERE, TROUBLE, BAG, PUNISHMENT, PUNISH are linked to the label BAD as food can become bad, honest,nice,sincere are all the opposites of BAD so all these words come under the same community represented by the label BAD.
+
+
+

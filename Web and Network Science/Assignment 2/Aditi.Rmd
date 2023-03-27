@@ -1,22 +1,37 @@
 ---
-title: "Main2"
+title: "Web and Network Assignment 2"
 author: "Aditi Sonkusare"
 output:
   pdf_document: default
-  html_document: default
-  word_document: default
+  html_document:
+    theme: cerulean
+  word_document: reference_docx:Aditi (1) (2).docx
+always_allow_html: yes
 ---
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r setup, include=FALSE}
 
+knitr::opts_chunk$set(echo = TRUE)
+
+#ignore warnings
 options(warn=-1)
 knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+#tinytex::install_tinytex(force=TRUE)
 ```
 
 ```{r}
 library(igraph)
 library(kableExtra)
+library(tidyverse)
 library(tidyr)
+library(ggraph)
+library(ggrepel)
+set.seed(100)
 
 
 # reading the graph 
@@ -32,8 +47,13 @@ V(wordpairs)$cue<-cues[[1]]
 print(diameter(wordpairs, weights = NA))
 
 ```
+##############################################################################################
+                        PART 1
+##############################################################################################
 
+Q1.1 
 ```{r}
+# function to check whether the passed target 1 and target 2 are the cue words:
 check_cue <- function(target1, target2){
   if(V(wordpairs)[target1]$cue & V(wordpairs)[target2]$cue){
     cat("Both the targets are cue words \n")
@@ -45,9 +65,10 @@ check_cue <- function(target1, target2){
 }
 ```
 
-
+Q1.1 :- 
+rand_walk_topic_network:
+Random walk can travel on a graph randomly by moving from one node to another which generates a series of nodes in a graph. It is frequently used to analyze a network's structure.
 ```{r}
-
 random_walk_topic_network <- function(wordpairs,target_node_names, steps, walks, mode, topn){
   list1 <- c()
   for (i in 1:walks){
@@ -69,23 +90,31 @@ random_walk_topic_network <- function(wordpairs,target_node_names, steps, walks,
 
 }
 
+```
 
-page_rank_ppr <- function(g, names, damping , topn){
+Q1.1 :- 
+ppr_topic_network:
+```{r}
+page_rank_ppr <- function(wordpairs, names, damping , topn){
 
-  teleport_probs <- rep(0,vcount(g))
-  teleport_probs[as.numeric(V(g)[names])]<-1/length(names)
+  teleport_probs <- rep(0,vcount(wordpairs))
+  teleport_probs[as.numeric(V(wordpairs)[names])]<-1/length(names)
   
-  pr<- page_rank(g,  directed = F, 
+  pr<- page_rank(wordpairs,  directed = F, 
                  personalized=teleport_probs, 
                  damping = damping)$vector
   
   top_n_pr <- order(pr, decreasing=TRUE)[1:topn]
   
-  top_n_pr<-V(g)[top_n_pr]
+  top_n_pr<-V(wordpairs)[top_n_pr]
+  word_association_network <- induced.subgraph(wordpairs, top_n_pr)
+  return(word_association_network)
 }
+```
 
-page_rank_ppr(g, c("HEAD", "HEART"), 0.85, 160)
 
+Q1.2 :- CENTRALITY MEASURES:
+```{r}
 centralities = function(word_association_network){
   eccentricity <- eccentricity(word_association_network)
   #eccentricity <- na.omit(eccentricity[!names(eccentricity) %in% c(target_word1, target_word2)])
@@ -98,212 +127,679 @@ centralities = function(word_association_network){
   eigen_centrality <- eigen_centrality(word_association_network)$vector
   #eigen_centrality <- eigen_centrality[!names(eigen_centrality) %in% c(target_word1, target_word2)]
   eigen_centrality <- head(sort(eigen_centrality, decreasing = TRUE), 5)
-  return(list(eccentricity, betweenness, eigen_centrality))
+  return(tibble(eccentricity = names(eccentricity),betweenness = names(betweenness),eigen_centrality = names(eigen_centrality)))
 }
-
 ```
+ 
 
 ```{r}
-target1 <- "SKILL"
-target2 <- "POTENTIAL"
+# FIRST PAIR: 
 
+#the first pair of targets: target1 as cocaine and target 2 as addiction:
+target1 <- "COCAINE"
+target2 <- "ADDICTION" 
+
+# first checking whether the passed targets are cue words or not:
 check_cue(target1, target2)
 
+# FOR RANDOM WALK:
+# calling random_walk function and passing steps, walks, modes and topn here:
 output <- random_walk_topic_network(wordpairs, c(target1, target2), 3, 100, "all", 160)
 
+#getting association of names in from the upper code:
 association <- V(wordpairs)[name %in% output]
 
-association_network <- induced.subgraph(wordpairs, association)
+#generating induced subgraph of wordpairs and association
+association_network1 <- induced.subgraph(wordpairs, association)
 
-centrality = centralities(association_network)
+# calling the centrality function here to measure the centrality of this network
+# which returns the top 5 centralities of each centrality measure:
+centrality1 <- centralities(association_network1)
 
-graph1 <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
-colnames(graph1) <- c("eccentricity", "betweeness", "eigen_centrality")
+# creating a kable which returns all three measures stored:
+tibble(centrality1, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 1: Centralities for Random Walk for First Pair of Targets") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+Comments: We can see three columns showing each centrality measure for random walk. In which betweenness and eigen centrality is performing more better as compared to eccentricity. As most related words are seen in eigen centrality - all the five words are related to the first pair of words. Among five, three words are related in betweenness centrality and eccentricity is giving all five words which are not related to first pair of targets.
 
-graph1 %>% kbl(booktabs = TRUE) %>%
-   kable_styling(full_width = F)
+Q1.3
+```{r}
+# visualisation for first pair of target for "random walk function"
+vertex_size <- 2.5 + degree(association_network1)/1.5
+cex_size <-2 + degree(association_network1)/12
 
-vertex_size <- 2.5 + degree(wordpairs)/1.5
-cex_size <-2 + degree(wordpairs)/12
+labels <- names(sort(eigen_centrality(association_network1)$vector, decreasing = T)[1:40])
 
-#ggraph(word_association_network, layout = "fr") 
-
-plot(association_network,
-      layout=layout_with_dh(association_network),
-      vertex.color= ifelse(V(association_network)$name %in% c(target1, target2),
-                           rgb(243/255,243/255, 15/255, 0.6),
-                           rgb(0, 0, 0, 0.2)),
-      vertex.size = ifelse(V(association_network)$name %in% c(target1, target2),
-                           15,
-                           7),
-      vertex.label.cex=ifelse(V(association_network)$name %in% c(target1, target2),
-                           0.9,
-                           0.5), 
-      vertex.label.dist=0,
-      edge.curved=0.2,
-      edge.width=0.4,
-      edge.arrow.size=0.01,
-      edge.color= rgb(0.5,0.5,0.5, 0.3))
+ggraph(association_network1, layout = "fr") +
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(association_network1)$name %in% c(target1, target2),
+                                    "#00FF00","#0000FF")) +
+  labs(title = paste("Graph 1: Graph for Random Walk for Cocaine and Addiction")) +
+  geom_node_text(
+    aes(label = ifelse(V(association_network1)$name %in% labels, name, element_blank())),
+    size = cex_size,
+    fontface = "bold",
+    repel = TRUE
+    ) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white"))
 ```
 
 ```{r}
-target1 <- "A"
+# FOR PAGE RANK FOR FIRST PAIR OF TARGET:
+# calling personalised pagerank function and passing wordpairs, names, damping and topn here:
+pg_output1 <- page_rank_ppr(wordpairs, c(target1, target2), 0.8, 160)
+
+# calculating the centrality measures:
+pg_centrality1 <- centralities(pg_output1)
+
+#generating the kable which returns all the three measures stored:
+tibble(pg_centrality1, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 2: Centralities for Page Rank for First Pair of Targets") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+```
+Comments: We can see three columns showing each centrality measure for page rank. In which betweenness and eigen centrality are providing more better as compared to eccentricity. As most related words are seen in eigen centrality - all the five words matches the first pair of words. Among five, three words are related and two words are clearly not related in betweenness centrality and eccentricity is giving the words which are not related to first pair of targets.
+
+Q1.3
+```{r}
+# Visualisation for first set of words using "page rank algorithm"
+pg_labels1 <- names(sort(eigen_centrality(pg_output1)$vector, decreasing = T)[1:40])
+
+vertex_size <- 2.5 + degree(pg_output1)/1.5
+cex_size <-2 + degree(pg_output1)/12
+
+ggraph(pg_output1, layout = "fr") +
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(pg_output1)$name %in% c(target1, target2),"#00FF00","#0000FF")) +
+  labs(title = paste("Graph 2: Graph for Page Rank for Cocaine and Addiction")) +
+  geom_node_text(
+    aes(label = ifelse(V(pg_output1)$name %in% pg_labels1, name, element_blank())),
+    size = cex_size,
+    fontface = "bold",
+    repel = TRUE
+    ) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white"))
+
+```
+
+
+```{r}
+# SECOND PAIR:
+
+#the second pair of targets: target1 as letter and target 2 as alphabet:
+target1 <- "LETTER"
 target2 <- "ALPHABET"
 
+# first checking whether the passed targets are cue words or not:
 check_cue(target1, target2)
 
+# FOR RANDOM WALK:
+# calling random_walk function and passing steps, walks, modes and topn here:
 output <- random_walk_topic_network(wordpairs, c(target1, target2), 3, 100, "all", 160)
 
+#getting association of names in from the upper code:
 association <- V(wordpairs)[name %in% output]
 
-association_network <- induced.subgraph(wordpairs, association)
+#generating induced subgraph of wordpairs and association
+association_network2 <- induced.subgraph(wordpairs, association)
 
-centrality = centralities(association_network)
+# calling the centrality function here to measure the centrality of this network
+# which returns the top 5 centralities of each centrality measure:
+centrality2 <- centralities(association_network2)
 
-graph1 <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
-colnames(graph1) <- c("eccentricity", "betweeness", "eigen_centrality")
+# creating a kable which returns all three measures stored:
+tibble(centrality2, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 3: Centralities for Random Walk for Second Pair of Targets") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-graph1 %>% kbl(booktabs = TRUE) %>%
-   kable_styling(full_width = F)
 
-vertex_size <- 2.5 + degree(wordpairs)/1.5
-cex_size <-2 + degree(wordpairs)/12
+```
+Comments: We can see three columns showing each centrality measure for random walk, in which betweenness and eigen centrality is performing more better as compared to eccentricity. As betweenness centrality performed the best here - all five words are related to the second pair of target. Few words are related in eigen centrality which is not related and eccentricity is giving the words which are not related to second pair of targets.
 
-#ggraph(word_association_network, layout = "fr") 
+Q1.3
+```{r}
+# visualisation for second pair of target for "random walk function"
+vertex_size <- 2.5 + degree(association_network2)/1.5
+cex_size <-2 + degree(association_network2)/12
 
-plot(association_network,
-      layout=layout_with_dh(association_network),
-      vertex.color= ifelse(V(association_network)$name %in% c(target1, target2),
-                           rgb(243/255,243/255, 15/255, 0.6),
-                           rgb(0, 0, 0, 0.2)),
-      vertex.size = ifelse(V(association_network)$name %in% c(target1, target2),
-                           15,
-                           7),
-      vertex.label.cex=ifelse(V(association_network)$name %in% c(target1, target2),
-                           0.9,
-                           0.5), 
-      vertex.label.dist=0,
-      edge.curved=0.2,
-      edge.width=0.4,
-      edge.arrow.size=0.01,
-      edge.color= rgb(0.5,0.5,0.5, 0.3))
+labels <- names(sort(eigen_centrality(association_network2)$vector, decreasing = T)[1:40])
+
+ggraph(association_network2, layout = "fr") +
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+  geom_node_point(aes(size = vertex_size),
+                    alpha = 0.8,
+                    colour = ifelse(V(association_network2)$name %in% c(target1, target2),
+                                    "#00FF00","#0000FF")) +
+  labs(title = paste("Graph 3:  Graph for Random Walk for Letters and Alphabet")) +
+  geom_node_text(
+    aes(label = ifelse(V(association_network2)$name %in% labels, name, element_blank())),
+    size = cex_size,
+    fontface = "bold",
+    repel = TRUE
+    ) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white"))
 ```
 
 ```{r}
-#plot(wordpairs,
-#     layout = layout_with_kk(wordpairs),
-#     vertex.color = cols,
-#     vertex.frame.color=ifelse(V(wordpairs) == v, "green3", "grey"))
+# FOR PAGE RANK FOR SECOND PAIR OF TARGET:
+# calling personalised pagerank function and passing wordpairs, names, damping and topn here:
+pg_output2 <- page_rank_ppr(wordpairs, c(target1, target2), 0.8, 160)
+
+# calculating the centrality measures:
+pg_centrality2 <- centralities(pg_output2)
+
+#generating a kable which stored all the three measures:
+tibble(pg_centrality2, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 4: Centralities for Page Rank for Second Pair of Targets") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+```
+Comments: We can see three columns showing each centrality measure for page rank, in which eigen centrality performed the best compared to eccentricity and betweenness for second pair of target. As all related words are seen in eigen centrality and very few words are related in betweenness centrality and eccentricity centrality.
+
+Q1.3
+```{r}
+# visualisation for second pair of target for "page rank function"
+
+pg_labels2 <- names(sort(eigen_centrality(pg_output2)$vector, decreasing = T)[1:40])
+
+vertex_size <- 2.5 + degree(pg_output2)/1.5
+cex_size <-2 + degree(pg_output2)/12
+
+ggraph(pg_output2, layout = "fr") +
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(pg_output2)$name %in% c(target1, target2),"#00FF00","#0000FF")) +
+  labs(title = paste("Graph 4: Graph for Page Rank for Letters and Alphabet")) +
+  geom_node_text(
+    aes(label = ifelse(V(pg_output2)$name %in% pg_labels2, name, element_blank())),
+    size = cex_size,
+    fontface = "bold",
+    repel = TRUE
+    ) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white"))
 ```
 
-```{r}
 
+```{r}
+# THIRD PAIR:
+
+#the third pair of targets: target1 as missing and target 2 as kidnap:
 target1 <- "MISSING"
 target2 <- "KIDNAP"
 
+# first checking whether the passed targets are cue words or not:
 check_cue(target1, target2)
 
+# FOR RANDOM WALK:
+# calling random_walk function and passing steps, walks, modes and topn here:
 output <- random_walk_topic_network(wordpairs, c(target1, target2), 3, 100, "all", 160)
 
+#getting association of names in from the upper code:
 association <- V(wordpairs)[name %in% output]
 
-association_network <- induced.subgraph(wordpairs, association)
+#generating induced subgraph of wordpairs and association
+association_network3 <- induced.subgraph(wordpairs, association)
 
-centrality = centralities(association_network)
+# calling the centrality function here to measure the centrality of this network
+# which returns the top 5 centralities of each centrality measure:
+centrality3<- centralities(association_network3)
 
-graph1 <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
-colnames(graph1) <- c("eccentricity", "betweeness", "eigen_centrality")
+# creating a kable which returns all three measures stored:
+tibble(centrality3, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 5: Centralities for Random Walk for Third Pair of Targets") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+Comments: We can see three columns showing each centrality measure for random walk, in which eigen centrality performed the best - all words given by eigen are related. Betweenness also performed good - gave one word which is not related to the third pair of target. Eccentricity centrality giving word which are and which are not related to the third pair of target.
 
-graph1 %>% kbl(booktabs = TRUE) %>%
-   kable_styling(full_width = F)
-vertex_size <- 2.5 + degree(wordpairs)/1.5
-cex_size <-2 + degree(wordpairs)/12
+Q1.3
+```{r}
+# visualisation for third pair of target for "random walk function"
+vertex_size <- 2.5 + degree(association_network3)/1.5
+cex_size <-2 + degree(association_network3)/12
 
-plot(association_network,
-      layout=layout_with_dh(association_network),
-      vertex.color= ifelse(V(association_network)$name %in% c(target1, target2),
-                           rgb(243/255,243/255, 15/255, 0.6),
-                           rgb(0, 0, 0, 0.2)),
-      vertex.size = ifelse(V(association_network)$name %in% c(target1, target2),
-                           15,
-                           7),
-      vertex.label.cex=ifelse(V(association_network)$name %in% c(target1, target2),
-                           0.9,
-                           0.5), 
-      vertex.label.dist=0,
-      edge.curved=0.2,
-      edge.width=0.4,
-      edge.arrow.size=0.01,
-      edge.color= rgb(0.5,0.5,0.5, 0.3))
+labels <- names(sort(eigen_centrality(association_network3)$vector, decreasing = T)[1:40])
 
+ggraph(association_network3, layout = "fr") +
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+  geom_node_point(aes(size = vertex_size),
+                    alpha = 0.8,
+                    colour = ifelse(V(association_network3)$name %in% c(target1, target2),
+                                    "#00FF00","#0000FF")) +
+  labs(title = paste("Graph 5: Graph for Random Walk for Kidnap and Missing")) +
+  geom_node_text(
+    aes(label = ifelse(V(association_network3)$name %in% labels, name, element_blank())),
+    size = cex_size,
+    fontface = "bold",
+    repel = TRUE
+    ) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white"))
 ```
 
 ```{r}
-#fast greedy community detection
-fc <- cluster_fast_greedy(association_network)
-#louvain community detection
-lv <- cluster_louvain(association_network)
-#walktrap community detection
-wt <- cluster_walktrap(association_network)
+# FOR PAGE RANK FOR THIRD PAIR OF TARGET:
+# calling personalised pagerank function and passing wordpairs, names, damping and topn here:
+pg_output3 <- page_rank_ppr(wordpairs, c(target1, target2), 0.8, 160)
 
-community_table <- function(clustering_data){
-  strings <- NULL
-  lengths <- c()
-  for(i in 1:length(clustering_data)){
+# calculating the centrality measures:
+pg_centrality3 <- centralities(pg_output3)
+
+#generating a kable which stored all the three measures:
+tibble(pg_centrality3, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 6: Centralities for Page Rank for Third Pair of Targets") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+Comments: We can see three columns showing each centrality measure for page rank, in which all the three centralities are giving related and are also giving not related words. All three are performing nicely but the results are not the best as compared to previous results.
+
+Q1.3
+```{r}
+# visualisation for third pair of target for "random walk function"
+pg_labels3 <- names(sort(eigen_centrality(pg_output3)$vector, decreasing = T)[1:40])
+
+vertex_size <- 2.5 + degree(pg_output3)/1.5
+cex_size <-2 + degree(pg_output3)/12
+
+ggraph(pg_output3, layout = "fr") +
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2) +
+  geom_node_point(aes(size = vertex_size),
+                    alpha = 0.8,
+                    colour = ifelse(V(pg_output3)$name %in% c(target1, target2),
+                                    "#00FF00","#0000FF")) +
+  labs(title = paste("Graph 6: Graph for Page Rank  for Kidnap and Missing")) +
+  geom_node_text(
+    aes(label = ifelse(V(pg_output3)$name %in% pg_labels3, name, element_blank())),
+    size = cex_size,
+    fontface = "bold",
+    repel = TRUE
+    ) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white"))
+```
+
+```{r}
+# Generating a single tibble to print all three centrality measures for the three pairs all-together for "random walk"
+
+tibble(centrality1, centrality2, centrality3, .name_repair = "minimal") %>%
+  kbl( caption = "TABLE 7: RANDOM WALK FOR ALL THREE PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>%
+  add_header_above(c("COCAINE AND ADDICTION" =3,"LETTER AND ALPHABET"= 3, "MISSING AND KIDNAP" = 3))
+```
+Comments: In conclusion to all three pairs of targets, there is atleast one centrality in each pair of target which is performing very poor. There is only one centrality measure among three which is best performing which is also giving the satisfactory results. The remaining one measure of centrality is giving related and not related words for which the results are poorly satisfactory on Random walk.
+
+```{r}
+# Generating a single tibble to print all three centrality measures for the three pairs all-together for "page rank"
+
+tibble(pg_centrality1, pg_centrality2, pg_centrality3, .name_repair = "minimal") %>%
+  kbl(caption = "TABLE 8: PAGE RANK FOR ALL THREE PAIRS OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left") %>%
+  add_header_above(c("COCAINE AND ADDICTION" =3,"LETTER AND ALPHABET"= 3, "MISSING AND KIDNAP" = 3))
+```
+Comments: In conclusion to all three pairs of targets, there are two centrality measures in each pair of target which is performing the best and there is only one centrality measure among three which is performing good but is failing to provide satisfactory results; which is giving related and not related words equally on page rank.
+
+Finally concluding, as page rank gives two centrality measures which satisfies the pair of target passed and random walk only gives one centrality measure which satisfies the pair of target passed. Page rank is performing up to the mark and also giving satisfactory results as compared to random walk.
+
+##############################################################################################
+                        PART 2
+##############################################################################################
+
+Q2.1 :- 
+```{r}
+#FOR RANDOM WALK
+#fast greedy community detection
+RW_1 <- cluster_fast_greedy(association_network1)
+
+#walktrap community detection
+RW_2 <- cluster_fast_greedy(association_network2)
+
+#fast greedy community detection
+RW_3 <- cluster_infomap(association_network3)
+
+#FOR PAGE RANK:
+#walktrap community detection
+PG_1 <- cluster_fast_greedy(pg_output1)
+
+#walktrap community detection
+PG_2 <- cluster_louvain(pg_output2)
+
+#walktrap community detection
+PG_3 <- cluster_edge_betweenness(pg_output3)
+
+
+community_table <- function(c_data){
+  s <- NULL
+  l <- c()
+  for(i in 1:length(c_data)){
     string = ""
-    for(word in clustering_data[[i]]){
+    for(word in c_data[[i]]){
       string = paste0(string, "'", word, "',")
     }
     
-    strings <- c(strings, string)
-    lengths <- c(lengths, length(clustering_data[[i]]))
+    s <- c(s, string)
+    l <- c(l, length(c_data[[i]]))
   }
-  
-  df <- tibble(strings, lengths)
+  print(length(s))
+  print(length(l))
+  comm_table <- tibble(s, l) 
   #arrange(desc(lengths))
-  colnames(df) <- c("Cluster","Size")
-  
-  return(df)
-}
+  colnames(comm_table) <- c("C","S")
+  comm_table <-  comm_table %>% arrange(desc(S)) 
+  return(comm_table)
+} 
 
-View(community_table(fc))
-
-View(community_table(lv))
-
-View(community_table(wt))
+View(community_table(RW_1))
+View(community_table(RW_2))
+View(community_table(RW_3))
+View(community_table(PG_1))
+View(community_table(PG_2))
+View(community_table(PG_3))
 ```
+Comments: 
+FOR ALGORITHMS ON RANDOM WALK:-
+1. Out of other algorithms like walktrap, edge betweeness, infomap; fast greedy cluster performed the best on random walk for first pair of targets, Which gave the size of the cluster as 22. Here, the particular clusters are providing the output of very few not related words and most of the words in this are related words to the first pair of targets.
+
+2. Out of other algorithms like label prop, louvain, infomap; fast greedy cluster performed the best on random walk for second pair of targets, Which gave the size of the cluster as 33 while other algorithms gave very high size of the particular cluster. Here, the particular clusters are providing the output of very few not related words and most of the words in this are related words to the second pair of targets.
+
+3. Out of other algorithms; infomap cluster performed the best on random walk for third pair of targets, Which gave the size of the cluster as 17 while other algorithms gave very high size of the particular cluster. This gave the best result. Here, the particular clusters are providing the output of very few not related words and most of the words in this are related words to the third pair of targets.
+
+FOR ALGORITHMS ON PAGE RANK:-
+1. After comparing other algorithms like louvain, edge betweeness, infomap to fast greedy; fast greedy cluster performed the best on page rank for first pair of targets, Which gave the size of the cluster as 28 whereas, other algorithm gave very high cluster size of a particular cluster. Here, the particular clusters are providing the output of very few not related words and most of the words in this are related words to the first pair of targets.
+
+2. After comparing  other algorithms; louvain cluster performed the best on page rank for second pair of targets, Which gave the size of the cluster as 29 while other algorithms gave very high size of the particular cluster. Here, the particular clusters are providing the output of very few not related words and most of the words in this are related words to the second pair of targets.
+
+3. After comparing other algorithms like label prop, fast greedy, leiden to edge betweeness; edge betweeness cluster performed the best on page rank for third pair of targets, Which gave the size of the cluster as 28 while other algorithms gave very high size of the particular cluster. Here, the particular clusters are providing the output of very few not related words and most of the words in this are related words to the third pair of targets.
 
 
-
-
-
+Q2.2 and Q2.3 :-
 ```{r}
 library(tibble)
 library(tidyverse)
+library(kableExtra)
+library(tibble)
 lables_community <- function(cluster, table){
   central_label <- c()
   for(i in 1:length(cluster)){
-    graph<- induced.subgraph(g, V(g)[cluster[[i]]])
+    graph <- induced.subgraph(wordpairs, V(wordpairs)[cluster[[i]]])
     
     central_label <- c(central_label,
                        names(sort(eigen_centrality(graph)$vector, decreasing = T)[1]))
   }
   
-  table <- table %>% add_column(lable = central_label) %>% arrange(desc(Size))
+  table <- tibble(table, central_label) %>% arrange(desc(S))
   
   return(table)
 }
+```
 
-out <- lables_community(fc, community_table(fc))
-out
+
+```{r}
+output_RW_1 <- lables_community(RW_1, community_table(RW_1))
+
+tibble(output_RW_1, .name_repair = "minimal") %>%
+  kbl(caption= "TABLE 9: SHOWING THE CENTRAL LABEL AND THE SIZE OF THE CLUSTER FOR RANDOM WALK FOR FIRST PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+Q2.4
+```{r}
+output_RW_1 <- output_RW_1 %>%
+  mutate(
+    Interpretation = c(
+       "Related to drug, cocain , addiction and dangerous which are a part of the target words",
+       "Related to powder and sniff which are a part of the target words",
+       "Related to habit and nervous which is a process to gain the target words",
+       "Related to danger and death which are the post outcomes to the target pairs",
+       "Non Relevant",
+       "Related to marijuna, high and herb are a part of target pairs",
+       "Related to addict and drugs clearly are a part of the target pairs",
+       "Non Relevant",
+       "Non Relevant",
+       "Related to smoke and tobacco are the ingredients of the target pairs",
+       "Non Relevant",
+       "Non Relevant",
+       "Related to needles and syringes are a instrument for the target pairs"
+     )
+   )
+
+output_RW_1 %>%
+  kbl(caption = "TABLE 10: INTERPRETATION FOR THE CLUSTER") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#output_RW_1
+View(output_RW_1)
+```
+Comments: Here, we can see the clusters, size of the cluster and one word label for the community. The community’s label are stored in the central_label for each cluster. We can notice there are non relevant words in the cluster as the size of the respective cluster reduces. Higher the size of the cluster higher is the probability that the words are related to target pairs. Few clusters are non relevant, where the random walk model is performing good but not giving satisfactory results on random walk for first pair of target.
+
+
+```{r}
+output_RW_2 <- lables_community(RW_2, community_table(RW_2))
+
+tibble(output_RW_2, .name_repair = "minimal") %>%
+  kbl(caption= "TABLE 11: SHOWING THE CENTRAL LABEL AND THE SIZE OF THE CLUSTER FOR RANDOM WALK FOR SECOND PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+Q2.4
+```{r}
+output_RW_2 <- output_RW_2 %>%
+  mutate(
+    Explanation = c(
+       "Related to A, alphabet, number and letters which are a part of target pairs",
+       "Related to school, book, learn, hadwritings",
+       "Related to message and letters which are related to target pairs",
+       "Related to school, english and grammar which are related to target pairs",
+       "Non Relevant",
+       "Related to numbers, phone and percentages somewhere related to target pairs",
+       "Related to articles and news somewhere related to target pairs",
+       "Related to names, headings and labels which are a part of target pairs",
+       "Related to computer and error somewhere related to target pairs",
+       "Non Relevant",
+       "Non Relevant",
+       "Related to give and take or return somewhere related to target pairs",
+       "Non Relevant",
+       "Non Relevant"
+     )
+   )
+
+output_RW_2 %>%
+  kbl(caption = "TABLE 12: INTERPRETATION FOR THE CLUSTER") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+View(output_RW_2)
+```
+Comments: Here, we can see the clusters, size of the cluster and one word label for the community. The community’s label are stored in the central_label for each cluster. We can notice there are non relevant words in the cluster as the size of the respective cluster reduces. Higher the size of the cluster higher is the probability that the words are related to target pairs. Here, the random walk is performing good by giving only 3-4 as non relevant to the second target pairs.
+
+
+```{r}
+output_RW_3 <- lables_community(RW_3, community_table(RW_3))
+
+tibble(output_RW_3, .name_repair = "minimal") %>%
+  kbl(caption= "TABLE 13: SHOWING THE CENTRAL LABEL AND THE SIZE OF THE CLUSTER FOR RANDOM WALK FOR THIRD PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+Q2.4
+```{r}
+output_RW_3 <- output_RW_3 %>%
+  mutate(
+    Explanation = c(
+       "Related to small and child related to target pairs",
+       "Related to abduct, kidnap and steal which are clearly a part of target pairs",
+       "Related to money, account and poor which are the outcomes of the target pairs",
+       "Non Relevant",
+       "Related to bad and horror are the process in the target pair",
+       "Related to killer and scarry are the process in the target pair",
+       "Related to missing, lost and find are a part and also the process of the target pair",
+       "Related to lost and disappear are clearly a part of target pairs",
+       "Related to absent and classes are clearly a part of target pairs",
+       "Non Relevant",
+       "Related to emptyness and alone",
+       "Related to kill, torchure and attack are a part of target pairs",
+       "Non Relevant",
+       "Related to capture or kidnap are clearly a part of target pairs",
+       "Non Relevant",
+       "Non Relevant",
+       "Non Relevant",
+       "Non Relevant",
+       "Related to not present that is absent ",
+       "Related to steal and fear are a part of target pairs",
+       "Related to stole are clearly a part of target pairs",
+       "Non Relevant",
+       "Non Relevant",
+       "Non Relevant",
+       "Non Relevant"
+     )
+   )
+
+output_RW_3 %>%
+  kbl(caption = "TABLE 14: INTERPRETATION FOR THE CLUSTER") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+View(output_RW_3)
+```
+Comments: Here, we can see the clusters, size of the cluster and one word label for the community. The community’s label are stored in the central_label for each cluster. We can notice there are non relevant words in the cluster as the size of the respective cluster reduces. Higher the size of the cluster higher is the probability that the words are related to target pairs. Here, we can see when the size is reducing the model is not performing up to the mark and giving 5-6 outputs for the clusters as non relevant.
+
+In conclusion to Random walk performance on the respective target pairs, the community detection algorithms are working good but still there are clusters which gives non relevant words as the output. Even though, the model is performing fairly good and also returning most outputs of the clusters which are related and completely relevant to the target pairs
+
+```{r}
+output_PG_1 <- lables_community(PG_1, community_table(PG_1))
+
+tibble(output_PG_1, .name_repair = "minimal") %>%
+  kbl(caption= "TABLE 15: SHOWING THE CENTRAL LABEL AND THE SIZE OF THE CLUSTER FOR PAGE RANK FOR FIRST PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+Q2.4
+```{r}
+output_PG_1 <- output_PG_1 %>%
+  mutate(
+    Explanation = c(
+       "Related to poison, doctor and death",
+       "Related to drug, cocaine and addiction",
+       "Related to drugs, marijuana, drugs, illegal",
+       "Related to nicotines, smoking, tobacco,ashtray, cigar and ciggrates",
+       "Related to powder, sniff, blow, nose and substances",
+       "Related to money, green, need, obsession and desire",
+       "Related to alcohol, beer and drinks",
+       "Related to bad, chemical, dangerous, habit and harmful",
+       "Related to tar, speed and black",
+       "Related to high, stoned, low",
+       "Related to dilemma and problems",
+       "Related to dream, illusion and relax",
+       "Related to needles, injection and syringe ",
+       "Non Relevant"
+     )
+   )
+
+output_PG_1 %>%
+  kbl(caption = "TABLE 16: INTERPRETATION FOR THE CLUSTER") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#output_RW_1
+View(output_PG_1)
+```
+Comments: Here, we can see the clusters, size of the cluster and one word label for the community. The community’s label are stored in the central_label for each cluster. As we can see that the model on Page Rank is performing very good and also giving satisfactory results and outputs, as there is only one clusters which is non relevant to the target pairs and other all are related to target pairs. As the size of the cluster is reducing still the page rank is giving related words to the target pair.
+
+
+```{r}
+output_PG_2 <- lables_community(PG_2, community_table(PG_2))
+tibble(output_PG_2, .name_repair = "minimal") %>%
+  kbl(caption= "TABLE 17: SHOWING THE CENTRAL LABEL AND THE SIZE OF THE CLUSTER FOR PAGE RANK FOR SECOND PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+```
+
+Q2.4
+```{r}
+output_PG_2 <- output_PG_2 %>%
+  mutate(
+    Explanation = c(
+       "Related to book, paper, write, notes, heading and type",
+       "Not Related",
+       "Related to letter, mail, envelope and mailbox",
+       "Related to alphabet, letters, ABC, numbers and papers",
+       "Related to  grade, work, class, school and money",
+       "Related to message, number, note and telephone",
+       "Related to one, number, name, symbol and digits",
+       "Related to words, dictionary, word and english",
+       "Related to notice, apper, newspaper and series",
+       "Non Relevant",
+       "Related to A, B, letters, ",
+       "Non Relevant",
+       "Related to many",
+       "Non Relevant"
+     )
+   )
+
+output_PG_2 %>%
+  kbl(caption = "TABLE 18: INTERPRETATION FOR THE CLUSTER") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#output_RW_1
+View(output_PG_2)
+```
+Comments: Here, we can see the clusters, size of the cluster and one word label for the community. The community’s label are stored in the central_label for each cluster. As we can see that the model on Page Rank is performing very good and also giving satisfactory results and outputs, as there are only two clusters which are non relevant to the target pairs and other all are related to target pairs. As the size of the cluster is reducing still the page rank is giving related words to the target pair.
+
+
+```{r}
+output_PG_3 <- lables_community(PG_3, community_table(PG_3))
+tibble(output_PG_3, .name_repair = "minimal") %>%
+  kbl(caption= "TABLE 19: SHOWING THE CENTRAL LABEL AND THE SIZE OF THE CLUSTER FOR PAGE RANK FOR THIRD PAIR OF TARGETS") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 ```
 
 ```{r}
-#g <- upgrade_graph(karate)
-#layt <- layout_with_graphopt(g)
+output_PG_3 <- output_PG_3 %>%
+  mutate(
+    Explanation = c(
+       "Related to pain and torchure",
+       "Related to absent, disappear, stolen, hidden and lost",
+       "Related to kidnap, steal, crime, jail, thief, robber, rob and robbery",
+       "Related to snatch, lose and escape",
+       "Related to not present, empt, absence, alone and late",
+       "Related to abduct, adduct, missing and vanish ",
+       "Related to scarry and horrible",
+       "Non Relevant",
+       "Non Relevant",
+       "Non Relevant"
+     )
+   )
 
-# Plot the network with community labels
-plot(fc, layout = layt, vertex.frame.color="gray", vertex.label.color="black", vertex.label.cex=0.7, edge.curved=0.2, edge.width=0.8)
+output_PG_3 %>%
+  kbl(caption = "TABLE 20: INTERPRETATION FOR THE CLUSTER") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#output_RW_1
+View(output_PG_3)
 ```
+Comments: Here, we can see the clusters, size of the cluster and one word label for the community. The community’s label are stored in the central_label for each cluster. As we can see that the model on Page Rank is performing very good and also giving satisfactory results and outputs, as there very few clusters which are non relevant to the target pairs and other all are related to target pairs. As the size of the cluster is reducing still the page rank is giving related words to the target pair.
 
+In conclusion to Page Rank performance on the respective target pairs, the community detection algorithms are working perfectly and returning just one to three non relevant clusters and other all clusters are relevant to the target pair of nodes. This model performed very well and gave satisfactory results as outcome for each cluster.
 
+Finally concluding and comparing the working of random walk and page rank on community detection algorithm, Page rank performed very well and gave satisfactory results as compared to random walk in all the three pairs of target.

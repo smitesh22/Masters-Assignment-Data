@@ -1,0 +1,40 @@
+---
+title: "Main"
+author: "Smitesh Patil"
+date: "2023-03-24"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+library(tidyverse)
+library(kableExtra)
+
+table <- read.csv("output.csv")
+
+table %>% tibble() %>%
+      kbl(
+      align = "c",
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      caption = paste0("Centrality Score for three word pairs using ")
+      ) %>%
+  kable_paper(
+        position = "center",
+        latex_options = c("striped", "repeat_header", "scale_down"),
+        stripe_color = "gray!15",
+        font_size = 15
+    )
+
+```
+
+

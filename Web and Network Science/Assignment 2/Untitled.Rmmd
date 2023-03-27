@@ -1,0 +1,27 @@
+---
+title: "Untitled"
+author: "Smitesh Patil"
+date: "2023-03-24"
+output: pdf_document
+---
+
+```{r}
+
+
+library(tidyverse)
+library(kableExtra)
+library(kable)
+
+
+data <- read_csv("output.csv")
+
+data %>%
+  knitr::kable(
+    format = "latex",
+    align = "l",
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    #printing the modularilty and word pairs
+  ) 
+```

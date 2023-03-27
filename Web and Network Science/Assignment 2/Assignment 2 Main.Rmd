@@ -165,29 +165,35 @@ plot_table <- function(df, type){
         latex_options = c("striped", "repeat_header", "scale_down"),
         stripe_color = "gray!15",
         font_size = 8
+    ) %>%
+    kable_paper(
+        position = "center",
+        latex_options = c("striped", "repeat_header", "scale_down"),
+        stripe_color = "gray!15",
+        font_size = 8
     )
 }
 #-----------------------------Q1.3----------------------------------------------
 #plotting the graph
-plot_graph = function(association_network, vertex_size, label_size, 
+plot_graph = function(association_network, 
                       target_word1, target_word2, count, type){
   # getting top 25 nodes  with high degree to label
   label_data <- names(sort(degree(association_network), decreasing = TRUE)[1:25])
   
-  #setting vertex size
-  vertex_size <- 2.5 + degree(association_network, mode = "all")/vertex_size
-  cex_size <-2 + degree(association_network, mode = "all")/label_size
-  
   #graph creation
   ggraph(association_network, layout = "fr")+
   #creating edges
-  geom_edge_link(start_cap = circle(2.5, "mm"),
-                   end_cap = circle(2.5, "mm"),
+  geom_edge_link(start_cap = circle(3.5, "mm"),
+                   end_cap = circle(3.5, "mm"),
                    edge_width = 0.2,
                    alpha = 0.2)+
   #parameters for nodes
-  geom_node_point(aes(size = vertex_size), 
-                    alpha = 0.8, 
+  #setting node size for word pairs different than other
+  geom_node_point(aes(size = ifelse(V(association_network)$name %in%
+                                    c(target_word1, target_word2), 
+                                    degree(association_network)*100,
+                                    degree(association_network)*50)), 
+                    alpha = 0.7, 
                     repel = TRUE,
                     # setting distinct color for word pair
                     colour = ifelse(V(association_network)$name %in%
@@ -198,7 +204,8 @@ plot_graph = function(association_network, vertex_size, label_size,
                          name, NA)),
       fontface = "bold",
       position = "identity",
-      size = cex_size,
+      #setting size of labels
+      size = degree(association_network)/10,
       repel = TRUE
       
     ) +
@@ -316,19 +323,19 @@ rank.
 
 ```{r fig.width= 10, fig.height=5}
 #plotting network
-plot_graph(word_association_network1_rand, 10, 30, "COURT", "LAWYER", 1,
+plot_graph(word_association_network1_rand, "COURT", "LAWYER", 1,
            "Random Walk")
-plot_graph(word_association_network1_page, 10, 30, "COURT", "LAWYER", 2,
+plot_graph(word_association_network1_page, "COURT", "LAWYER", 2,
            "Personalised Page Rank")
 #plotting network
-plot_graph(word_association_network2_rand, 10, 30, "CHILDREN", "PARENTS", 3,
+plot_graph(word_association_network2_rand, "CHILDREN", "PARENTS", 3,
            "Random Walk")
-plot_graph(word_association_network2_page, 10, 30, "CHILDREN", "PARENTS", 4,
+plot_graph(word_association_network2_page, "CHILDREN", "PARENTS", 4,
            "Personalised Page Rank")
 #plotting the graph
-plot_graph(word_association_network3_rand, 10, 30, "KING", "ROYAL", 5,
+plot_graph(word_association_network3_rand, "KING", "ROYAL", 5,
            "Random Walk")
-plot_graph(word_association_network3_page, 10, 30, "KING", "ROYAL", 6,
+plot_graph(word_association_network3_page, "KING", "ROYAL", 6,
            "Personalised Page Rank")
 ```
 

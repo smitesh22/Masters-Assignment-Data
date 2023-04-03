@@ -1,0 +1,352 @@
+---
+title: "Assignment 2"
+author: "Smitesh Patil"
+date: "2023-03-10"
+output:
+  pdf_document: default
+  html_document: default
+latex_engine: pdflatex
+classoption: landscape
+header-includes:
+  \usepackage{helvet}
+  \renewcommand\familydefault{\sfdefault}
+---
+
+```{r setup, include=TRUE, cache = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#ignore warnings
+options(warn=-1)
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+
+```{r}
+#importing all the necessary libraries
+library(igraph)
+library(ggraph)
+library(ggrepel)
+library(kableExtra)
+library(gt)
+library(tidyr)
+library(dplyr)
+
+
+# reading the graph 
+g<- read_graph(file="./WordPairs.txt",format="pajek")
+#removing directions 
+g<- as.undirected(g)
+g<- simplify(g)
+
+#reading the cue text file for setting the cue attribute for graph
+cues <- read.table("./cue.txt", header = F, sep="\t", skip=4)
+
+#setting the cue attribute
+V(g)$cue<-cues[[1]]
+
+#checking the diameter value
+print(diameter(g, weights = NA))
+
+```
+
+```{r}
+
+check_cue_words <- function(target_node_name1, target_node_name2){
+# test if the selected words are cue words
+  
+  if(V(g)[target_node_name1]$cue & V(g)[target_node_name2]$cue){
+    cat("Both target words are cue words \n")
+  }else{
+    cat("Both target words are NOT cue words \n")
+    cat(target_node_name1, "cue = ", as.logical(V(g)[target_node_name1]$cue ),"\n")
+    cat(target_node_name2, "cue = ", as.logical(V(g)[target_node_name2]$cue ),"\n")
+  }
+}
+
+
+```
+
+```{r}
+#random walk function
+random_walk_topic_network <- function(g,target_node_names, steps, walks, mode, topn){
+  #initialising a empty vector
+  vertices <- c()
+  #looping on the two target names
+  for (i in 1:2){
+    #looing on the number of walks
+    for (j in 1:walks){
+     #running randow walk and appending the vertices to the list
+     vertices <- c(vertices, list(random_walk(g, target_node_names[i], steps, mode = mode)))
+   }
+  }
+  
+  #calculating the frequency of words appeared in the vertices vector and subsetting top n
+  frequency_target <- head(sort(table(names(unlist(vertices))), decreasing = TRUE), topn)
+  #getting unique words
+  unique_words <- names(frequency_target)
+  
+  #preparing and returning vertices in graph format
+  vertices_in_word_association <- V(g)[name %in% unique_words]
+  return(vertices_in_word_association)
+}
+
+#page rank function
+page_rank_network <- function(g, target_node_names, topn, damping){
+  #storing probabilites for all the vertices in the graph
+  teleport_probs <- rep(0,vcount(g))
+  teleport_probs[as.numeric(V(g)[target_node_names])]<-1/length(target_node_names)
+  #running page rank with parameters passed
+  pr <- page_rank(g,  directed = F, personalized=teleport_probs, damping = damping)$vector
+  # getting top n vertices
+  top_n_pr <- order(pr, decreasing=TRUE)[1:topn]
+  top_n_pr<-V(g)[top_n_pr]
+  
+  #returning the vertices
+  return(top_n_pr)
+}
+
+#centrailites function for getting top vertices based on centrailites
+centralities = function(word_association_network){
+  #page rank centralities
+  page_rank <- page_rank(word_association_network)$vector
+  page_rank <- na.omit(page_rank[!names(page_rank) %in% c(target_word1, target_word2)])
+  #getting five highest values
+  page_rank <- sort(page_rank, decreasing = TRUE)[1:5]
+
+  #betweeness centralities 
+  betweenness <- betweenness(word_association_network)
+  betweenness <- betweenness[!names(betweenness) %in% c(target_word1, target_word2)]
+  #getting five highest values
+  betweenness <- sort(betweenness, decreasing = TRUE)[1:5]
+
+  #eigen centralities
+  eigen_centrality <- eigen_centrality(word_association_network)$vector
+  eigen_centrality <- eigen_centrality[!names(eigen_centrality) %in% c(target_word1, target_word2)]
+  #getting five highest values
+  eigen_centrality <- sort(eigen_centrality, decreasing = TRUE)[1:5]
+  
+  #retuning all the centralities in the list
+  return(list(page_rank, betweenness, eigen_centrality))
+}
+
+plot_table <- function(centrality){
+  #creating data frame wihth centrailities score
+  df <- tibble(names(centrality[[1]]) , names(centrality[[2]]), names(centrality[[3]]))
+  colnames(df) <- c("Page_Rank", "Betweenness", "Eigen_Centrality")
+  df %>% mutate(
+  No = 1:nrow(df)
+) %>%
+  select(No, Page_Rank, Betweenness, Eigen_Centrality) %>%
+  knitr::kable(
+    format = "latex",
+    align = "l",
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    ) %>%
+  kableExtra::kable_paper(
+      position = "left",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15"
+  )
+}
+
+plot_graph = function(association_network, vertex_size, label_size, 
+                      target_word1, target_word2){
+  
+  vertex_size <- 2.5 + degree(association_network)/vertex_size
+  cex_size <-2 + degree(association_network)/label_size
+  ggraph(association_network, layout = "fr")+
+  geom_edge_link(start_cap = circle(2.5, "mm"),
+                   end_cap = circle(2.5, "mm"),
+                   edge_width = 0.2,
+                   alpha = 0.2)+
+  geom_node_point(aes(size = vertex_size), 
+                    alpha = 0.8, 
+                    colour = ifelse(V(association_network)$name %in%
+                                      c(target_word1, target_word2), "yellow","red"))+
+  geom_node_text(
+      aes(label = name),
+      fontface = "bold",
+      size = cex_size,
+      repel = TRUE
+    ) +
+  guides(size = FALSE)
+}
+```
+
+```{r fig.width=10, fig.height=7}
+#target words
+target_word1 <- "COURT"
+target_word2 <- "LAWYER"
+
+#checking the cue words
+check_cue_words(target_word1, target_word2)
+
+#calling the function
+out <- random_walk_topic_network(g, c(target_word1, target_word2), 3, 40, "all", 160)
+#out <- page_rank_network(g, c(target_word1, target_word2), 160, 0.65)
+
+#creating a subgraph with the vertices returned by random walk/ Personalised page rank
+word_association_network1 <- induced.subgraph(g, out)
+
+#calling the centralites function
+centrality = centralities(word_association_network1)
+
+
+#plot dataframe
+plot_table(centrality = centrality)
+
+#plotting network
+plot_graph(word_association_network1, 10, 30, target_word1, target_word2)
+```
+
+```{r fig.width= 10, fig.height=7}
+
+target_word1 <- "POLYESTER"
+target_word2 <- "COTTON"
+
+check_cue_words(target_word1, target_word2)
+
+out <- page_rank_network(g, c(target_word1, target_word2), 160, 0.95)
+
+word_association_network2 <- induced.subgraph(g, out)
+
+centrality = centralities(word_association_network2)
+
+plot_table(centrality = centrality)
+
+plot_graph(word_association_network2, 10, 30, target_word1, target_word2)
+```
+
+
+```{r fig.width= 10, fig.height=7}
+target_word1 <- "KING"
+target_word2 <- "FAITH"
+
+check_cue_words(target_word1, target_word2)
+
+out <- page_rank_network(g, c(target_word1, target_word2), 160, 0.95)
+
+word_association_network3 <- induced.subgraph(g, out)
+
+centrality = centralities(word_association_network3)
+
+plot_table(centrality = centrality)
+
+plot_graph(word_association_network3, 10, 30, target_word1, target_word2)
+```
+
+
+```{r}
+#fast greedy community detection
+cluster1 <- cluster_fluid_communities(word_association_network1, no.of.communities = 13)
+#louvain community detection
+cluster2 <- cluster_optimal(word_association_network2)
+#walktrap community detection
+cluster3 <- cluster_louvain(word_association_network3)
+
+create_community_table <- function(clustering_data){
+  strings <- c()
+  lengths <- c()
+  for(i in 1:length(clustering_data)){
+    string = ""
+    for(word in clustering_data[[i]]){
+      string = paste0(string, word, " , ")
+    }
+    
+    strings <- append(strings, string)
+    lengths <- append(lengths, length(clustering_data[[i]]))
+  }
+  df <- tibble(strings, lengths) %>%
+    filter(lengths > 1 ) 
+  colnames(df) <- c("Cluster","Size")
+  
+  return(df)
+}
+
+print_community_table <- function(community){
+  community %>%
+  arrange(desc(Size)) %>%
+  mutate(No = 1:nrow(community)) %>%
+  select(No, Cluster, Size) %>%
+  knitr::kable(
+    format = "latex",
+    align = "l",
+    booktabs = TRUE,
+    longtable = TRUE,
+    linesep = "",
+    ) %>%
+  column_spec(column = 2, width = "8in") %>%
+  kableExtra::kable_paper(
+      position = "left",
+      latex_options = c("striped", "repeat_header"),
+      stripe_color = "gray!15"
+  )
+
+}
+
+community_table1 <- create_community_table(cluster1)
+print_community_table(community_table1)
+
+community_table2 <- create_community_table(cluster2)
+print_community_table(community_table2)
+
+community_table3 <- create_community_table(cluster3)
+print_community_table(community_table3)
+```
+
+```{r, results='asis'}
+#loop on the communities
+
+define_community_labels <- function(cluster, dataframe){
+  community_label = c()
+  for (i in 1:length(cluster)){
+    
+    if (length(cluster[[i]]) > 1){
+      vertices_in_community <- V(g)[name %in% cluster[[i]]]
+      community_graph <- induced.subgraph(g, vertices_in_community)
+      page_rank <- page_rank(community_graph)$vector
+      label = sort(page_rank, decreasing = TRUE)[1]
+      community_label <- c(community_label, label)
+    }
+  }
+  dataframe<- dataframe %>% mutate(community_label = names(community_label))
+  
+  return(dataframe)
+}
+
+plot_dataframe = function(labelled_data){
+  labelled_data %>%
+    arrange(desc(Size)) %>%
+    mutate(No = 1:nrow(labelled_data)) %>%
+    filter(Size > 2) %>%
+    select(No, Cluster, community_label, Size) %>%
+    knitr::kable(
+      format = "latex",
+      align = "l",
+      booktabs = TRUE,
+      longtable = TRUE,
+      linesep = "",
+      ) %>%
+    column_spec(column = 2, width = "7in") %>%
+    kableExtra::kable_paper(
+        position = "left",
+        latex_options = c("striped", "repeat_header, scale_down"),
+        stripe_color = "gray!15"
+  )
+  
+}
+
+clus1_comm_label<-define_community_labels(cluster1, community_table1) 
+plot_dataframe(clus1_comm_label)
+
+clus2_comm_label<-define_community_labels(cluster2, community_table2) 
+plot_dataframe(clus2_comm_label)
+
+clus3_comm_label<-define_community_labels(cluster3, community_table3) 
+plot_dataframe(clus3_comm_label)
+
+```
+
+

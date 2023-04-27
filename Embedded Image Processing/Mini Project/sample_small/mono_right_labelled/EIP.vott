@@ -1,0 +1,52 @@
+{
+    "name": "EIP",
+    "securityToken": "EIP Token",
+    "sourceConnection": {
+        "name": "EIP",
+        "providerType": "localFileSystemProxy",
+        "providerOptions": {
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMjkxMDgzMGMyOGRhMDk4YjIxMTE1NGU0ZmM1YjRkM2MzMzRiMWYyNTk1N2VhMDdjYmZhMWRiNjA3NzE0MGIyZTVhNmNhZjY1MGY5ZTZhMDM2MzQ2YTgyZDQwZWEyMGQ5MWU2NjM5YWU5MmExMjgxYzNlMzM2ZmM0YjgxYzhlZjhjNzc3MjFiNjU0MmM5NDg5MDNjMDVmNmQyOGNhYWNmNTE3YjRhZWZiNGVkZDRkMjlkM2VlZDY3ZDg4NGE1ZmYyOTAyYTk1ODhhM2JiZTUxNmE3OGJlNWI3NTQxZDE2ZGU1ZGI5OWRiZDc2ZjY1N2I0ZDFmMmFkYmVmOGZiNzFhZDMxYzQ0MWJkZWNiNWMwYzAwOGNlNTQwZTY2MDkzYTI0YzllMzJkNzA5YmJlOTYzMDEyOWUwOGZhMGQ4ZTBlNmVjNzYwZWU3MWQ5ZGYyZTA5ZGVkMjVkNjJmZjAzM2YzOSIsIml2IjoiOTYwYjgyYTY5NDdjNWRlMDkxMGMzYTRiNmI0YzhiYWE2NDBiNzBkZmFiZDdlYzJiIn0="
+        },
+        "id": "Rw97iNsxY"
+    },
+    "targetConnection": {
+        "name": "EIP OUT",
+        "providerType": "localFileSystemProxy",
+        "providerOptions": {
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiYjQ5MmZkM2Q0NTkwMGUxY2Y0ZDQ3YTk0Yjg2ZGI0NTQwYjZkMjJkZGE4YjQ1NTgzOWEzOWU4NGQyN2JlNjBhNzllYzViOWY2ZmY5ODRhNDMxY2YzZWZmMDJkYzQ3YTVlYTE4YzZhYzc2MTg0MDM4MTMwNWRhMDZjYTNhNTJiYmI2YTU5ZDliY2M3MmY3ZDZhMGFkMDUxMWY5MGVmNWUyNTc5MDBmYTlmYWMwNzc5MzllMmUwNTZjNTk0MTlmY2Q4OTEzMGQ0NmMwMTgxNDc4NTQ4Mzg1ZDljNDY2YTRjM2M4ZWEwNDNlZDZjOTUyZGI5YmMzZTViNDEyNDNjYmMwMGNiMDZjMDQxNTJhNDEzYzAzNDZkZWU5NWFlNTI1NGQzYWE0NjYzMWQ5ZjI0YTgzNjg1OWQ0MjEzZWRmOTM1YzlkN2M0YmE5M2FiMWJmNmM0NDFjZTMwZjZmNWUyZWJhYyIsIml2IjoiYzFiZjkwNzU1MThiYTIyOGJhZjQ0YTA1NjA0MzZlNWY0ZTFlZDI2ZGM3ODI0OTZmIn0="
+        },
+        "id": "Ely0ftq6S"
+    },
+    "videoSettings": {
+        "frameExtractionRate": 15
+    },
+    "tags": [],
+    "id": "08IBBh45O",
+    "activeLearningSettings": {
+        "autoDetect": false,
+        "predictTag": true,
+        "modelPathType": "coco"
+    },
+    "exportFormat": {
+        "providerType": "vottJson",
+        "providerOptions": {
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMmYyZWIzNWE3MjEwMTlkMDQ3ZDAwNTMyNGIxNzJlYzdlYzQzOTMzMzBkMGJhMjlkODM4ZWRjNjY3OGJiYWI5NWIwMDYzOTlkNjY0OWY2NWQzNDY3MWEzMDYzNjM3OWJhIiwiaXYiOiI0OGU1NzYxMDYwZDY2MjA3YjdjM2JmNWFiNTQxNDIzNWMwODg0YzE2MzQ0YzIxNDkifQ=="
+        }
+    },
+    "version": "2.2.0",
+    "lastVisitedAssetId": "2947c36d9a01966cbcae8378b5709b6f",
+    "assets": {
+        "2947c36d9a01966cbcae8378b5709b6f": {
+            "format": "png",
+            "id": "2947c36d9a01966cbcae8378b5709b6f",
+            "name": "1418381798122301.png",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right/1418381798122301.png",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        }
+    }
+}

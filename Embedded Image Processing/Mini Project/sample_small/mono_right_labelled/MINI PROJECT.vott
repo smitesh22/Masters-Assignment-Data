@@ -1,0 +1,261 @@
+{
+    "name": "MINI PROJECT",
+    "securityToken": "MINI PROJECT Token",
+    "sourceConnection": {
+        "name": "unlabelled",
+        "providerType": "localFileSystemProxy",
+        "providerOptions": {
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiZDU5NjRlODUzODk2NjcwZGUwZGQ4MTBjYzRjZmIzODE2ZjYwZmRmMDM2NjNhYTgxOTUyN2I2MmY3NGE5YjdmN2E5N2U5MWMzOTRkOTEwODgyODJiYTRhNGNlMzFlZWJjNTgzYmU4ZjQzN2IwY2QzY2Q1MTFlZjc3NTE0ZTUzMTlkMjA3MmExOTM0YjQyM2U0Njc4M2IyNzc0OTdmODhmMThjMGE2ODUxYmY0MzBjMjk2NjQ0NzEyMDJkN2VlNWFiZjRjMDI4MzRlOGM2NTEzYmMzMDNlZDc4ZWM4YTI2YzVkOGI2OGIzZTY1YjM0MGRhM2MyNGMxMWVkY2RkOGZjNzZhYmJmMjE0NWUxZTRkYTFlNjBmZmQzNTFhOTA0MjY4OGNmYzQzMDk0MTM4OWExYzgxZWYxNzM5NTYxZWZhNDgwYjA1NWZmYTBkMGE0N2VlYWRmNWZmY2YyZjVlZDdhNSIsIml2IjoiYWFhZjYyZDg2N2FhMjgwZDM1ODc2M2YzYzM2YzFiNzljMTgxMzFjNTRlYTk3NDg2In0="
+        },
+        "id": "ubCCkvaoG"
+    },
+    "targetConnection": {
+        "name": "labelled",
+        "providerType": "localFileSystemProxy",
+        "providerOptions": {
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiMjU3NzFkNjEwZmMxMjk4ZjUzMDU0YzFiMWZkMDMwMmIwNTU0MGNmMDFmMTBjZGU3NTBmOWU5YTlhOGE0MzkzODZmODcyZjNlOTczMGE4NmFmY2JiMGE5M2Y4NzQ5YjI5ZDExZTllZDA0NTk0OWM3MDhhZGE5MzczNjkxMTlmNGY2YjIwMThlNDNjMmM3M2M2ODliODBmOGNlYWQ2ZDM2ZjM4Y2I2ZGZmM2I4YjAwMWUzZWI3NmMzN2Q1NmNmN2Q2MWQ4NDc5YzY3NWEyMTU0NmRiMmVmNGFhNDBmYTQ4NDExZWE4MzUwYTQyYjNlNTU5MDdjZTE0ZDcyMWI4NTk4MGQ3YTExNTM0NWJlOWVkNDU5M2RmNmU0Mjc4NmUxNzFmMjkwMDJmMjg1ZmIzMTkxZGY4ZWZjYzZiZjFlMjNmODc4OTFjZGMyMWY1YWI1MDFlZmUzYmUxZjJiNTIzZTA1ZiIsIml2IjoiNGJkODczNTFiZjc1OGU3MDUyODg3MDZiNmU2Y2IxMjRhZjkzMWQ3N2IzYzU0YmJiIn0="
+        },
+        "id": "W5PJk752Q"
+    },
+    "videoSettings": {
+        "frameExtractionRate": 15
+    },
+    "tags": [
+        {
+            "name": "Parking Spot",
+            "color": "#5db300"
+        }
+    ],
+    "id": "jz-FWp4ca",
+    "activeLearningSettings": {
+        "autoDetect": false,
+        "predictTag": true,
+        "modelPathType": "coco"
+    },
+    "exportFormat": {
+        "providerType": "vottJson",
+        "providerOptions": {
+            "encrypted": "eyJjaXBoZXJ0ZXh0IjoiY2ZlYTk1YTc1MWUxM2JiMDAwMGE2YTg0MzBlOTA1NDQ5NjRmNjg0YmZhOTMyODRlMDUwYmQzN2YzMGRlYTNjNDYxZjUxZWE0YmE5MjkzNWU5ZTkxNjlhYjY2ODc4MDM5IiwiaXYiOiIzMzU1ZTU3NDU0MWQ5Nzk5NzEwOTA5OGM5NzFjNTFmNGFmMjhmNTY5M2RmOGVmYzEifQ=="
+        }
+    },
+    "version": "2.2.0",
+    "lastVisitedAssetId": "d687580a98aa33e4591aebf056f98ca4",
+    "assets": {
+        "030ce6ac9ad7ab9ca2713b778d529176": {
+            "format": "jpg",
+            "id": "030ce6ac9ad7ab9ca2713b778d529176",
+            "name": "0.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/0.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "c241f58cab63f9ee0b4296a541a4ac5b": {
+            "format": "jpg",
+            "id": "c241f58cab63f9ee0b4296a541a4ac5b",
+            "name": "1.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/1.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "d687580a98aa33e4591aebf056f98ca4": {
+            "format": "jpg",
+            "id": "d687580a98aa33e4591aebf056f98ca4",
+            "name": "10.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/10.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "d8e028a4657759407de967caf05c0530": {
+            "format": "jpg",
+            "id": "d8e028a4657759407de967caf05c0530",
+            "name": "11.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/11.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "2b82ba0916251cd1b772ad9dc231b500": {
+            "format": "jpg",
+            "id": "2b82ba0916251cd1b772ad9dc231b500",
+            "name": "12.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/12.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "9e6c80d2bcb8138a22e0bcd7cf2c1fe8": {
+            "format": "jpg",
+            "id": "9e6c80d2bcb8138a22e0bcd7cf2c1fe8",
+            "name": "13.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/13.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "afc811f64aeaefa897c8fb1d6913ecaf": {
+            "format": "jpg",
+            "id": "afc811f64aeaefa897c8fb1d6913ecaf",
+            "name": "14.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/14.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "17b35f30ca4bc8e393855924903d3f25": {
+            "format": "jpg",
+            "id": "17b35f30ca4bc8e393855924903d3f25",
+            "name": "15.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/15.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "fffa15811e0ed58fbb155617ccf1c7ed": {
+            "format": "jpg",
+            "id": "fffa15811e0ed58fbb155617ccf1c7ed",
+            "name": "16.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/16.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "39cc768bd6c93ee667bdd82ac54112ac": {
+            "format": "jpg",
+            "id": "39cc768bd6c93ee667bdd82ac54112ac",
+            "name": "17.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/17.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "c7bc75e6a696c031bbd5d6ad38feac2c": {
+            "format": "jpg",
+            "id": "c7bc75e6a696c031bbd5d6ad38feac2c",
+            "name": "18.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/18.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "d5a979c1879aacfb20a8799515dc6d78": {
+            "format": "jpg",
+            "id": "d5a979c1879aacfb20a8799515dc6d78",
+            "name": "19.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/19.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        },
+        "c9f522e5b0376606871c8b794afd3630": {
+            "format": "jpg",
+            "id": "c9f522e5b0376606871c8b794afd3630",
+            "name": "2.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/2.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "e9262d8d824b7575b0dfed5b83a0e014": {
+            "format": "jpg",
+            "id": "e9262d8d824b7575b0dfed5b83a0e014",
+            "name": "3.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/3.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "4c3f903e431e244b93c4c9c1d28cc30e": {
+            "format": "jpg",
+            "id": "4c3f903e431e244b93c4c9c1d28cc30e",
+            "name": "4.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/4.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "8b8984200b4ae14d9c4b5baff7756cd8": {
+            "format": "jpg",
+            "id": "8b8984200b4ae14d9c4b5baff7756cd8",
+            "name": "5.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/5.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "b7b6042cfb127c7f7845d62ca4460c59": {
+            "format": "jpg",
+            "id": "b7b6042cfb127c7f7845d62ca4460c59",
+            "name": "6.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/6.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 2,
+            "type": 1
+        },
+        "918fa06281f257ca8d9f87f080a8043a": {
+            "format": "jpg",
+            "id": "918fa06281f257ca8d9f87f080a8043a",
+            "name": "7.jpg",
+            "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/7.jpg",
+            "size": {
+                "width": 1024,
+                "height": 1024
+            },
+            "state": 1,
+            "type": 1
+        }
+    }
+}

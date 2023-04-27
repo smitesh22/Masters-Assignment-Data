@@ -1,0 +1,48 @@
+{
+    "asset": {
+        "format": "jpg",
+        "id": "e9262d8d824b7575b0dfed5b83a0e014",
+        "name": "3.jpg",
+        "path": "file:C:/Users/Smitesh/Documents/Football%20Data%20Analysis/Masters-Assignment-Data/Embedded%20Image%20Processing/Mini%20Project/sample_small/mono_right_unlabelled/3.jpg",
+        "size": {
+            "width": 1024,
+            "height": 1024
+        },
+        "state": 2,
+        "type": 1
+    },
+    "regions": [
+        {
+            "id": "EXbZAFw1m",
+            "type": "POLYGON",
+            "tags": [
+                "Parking Spot"
+            ],
+            "boundingBox": {
+                "height": 173.12230215827338,
+                "width": 399.0406924460432,
+                "left": 436.18232913669067,
+                "top": 488.6714815647482
+            },
+            "points": [
+                {
+                    "x": 538.0911645683453,
+                    "y": 513.2278552158274
+                },
+                {
+                    "x": 436.18232913669067,
+                    "y": 661.7937837230216
+                },
+                {
+                    "x": 835.2230215827338,
+                    "y": 638.4652652877699
+                },
+                {
+                    "x": 676.8345323741007,
+                    "y": 488.6714815647482
+                }
+            ]
+        }
+    ],
+    "version": "2.2.0"
+}
